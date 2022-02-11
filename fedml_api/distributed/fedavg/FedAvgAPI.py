@@ -1,3 +1,5 @@
+import logging
+
 from mpi4py import MPI
 
 from .FedAVGAggregator import FedAVGAggregator
@@ -82,6 +84,7 @@ def init_server(
     model_trainer,
     preprocessed_sampling_lists=None,
 ):
+    logging.info('Initializing server')
     if model_trainer is None:
         if args.dataset == "stackoverflow_lr":
             model_trainer = MyModelTrainerTAG(model)
@@ -138,6 +141,8 @@ def init_client(
     test_data_local_dict,
     model_trainer=None,
 ):
+    logging.info('Initializing client')
+
     client_index = process_id - 1
     if model_trainer is None:
         if args.dataset == "stackoverflow_lr":

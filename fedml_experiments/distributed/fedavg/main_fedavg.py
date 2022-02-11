@@ -1,5 +1,18 @@
-import argparse
 import logging
+
+from mpi4py import MPI
+
+i = MPI.COMM_WORLD.Get_rank()
+
+prefix = 'Client {}'.format(i) if i != 0 else 'Server'
+
+logging.basicConfig(
+    level=logging.NOTSET,
+    format="%(asctime)s  %(levelname)s  (%(filename)s:%(lineno)d)  " + prefix + " -  %(message)s",
+    datefmt="%H:%M:%S",
+)
+
+import argparse
 import os
 import random
 import socket
@@ -408,11 +421,7 @@ if __name__ == "__main__":
 
     # customize the log format
     # logging.basicConfig(level=logging.INFO,
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format=str(process_id) + " - %(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s",
-        datefmt="%a, %d %b %Y %H:%M:%S",
-    )
+
     hostname = socket.gethostname()
     logging.info(
         "#############process ID = "
@@ -432,13 +441,14 @@ if __name__ == "__main__":
             # project="federated_nas",
             project="fedml",
             name="FedAVG(d)"
-            + str(args.partition_method)
-            + "r"
-            + str(args.comm_round)
-            + "-e"
-            + str(args.epochs)
-            + "-lr"
-            + str(args.lr),
+                 + str(args.partition_method)
+                 + "r"
+                 + str(args.comm_round)
+                 + "-e"
+                 + str(args.epochs)
+                 + "-lr"
+                 + str(args.lr),
+            entity="aminesi",
             config=args,
         )
 

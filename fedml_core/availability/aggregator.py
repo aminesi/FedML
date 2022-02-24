@@ -29,7 +29,7 @@ class BaseAggregator(ABC):
         self.model_dict = dict()
         self.sample_num_dict = dict()
         self.flag_client_model_uploaded_dict = dict()
-        self.client_times = np.array([0] * self.args.client_num_in_total)
+        self.client_times = np.array([0] * self.args.client_num_in_total).astype(np.float32)
         self.selected_clients = []
 
         for idx in range(self.worker_num):

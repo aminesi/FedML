@@ -8,6 +8,8 @@ import os
 
 import numpy as np
 
+from fedml_core.availability.simulation import load_sim_data, BaseSim
+
 
 class TimeMode(Enum):
     # REAL = 1
@@ -15,38 +17,11 @@ class TimeMode(Enum):
     NONE = 2
 
 
-class ClientSim:
-    def __init__(self, trace, speed, args):
-        self.trace = trace
-        self.compute_speed = speed['computation']
-        self.bandwidth = speed['communication']
-        self.args = args
-        self.behavior_index = 0
-
-    def is_active(self, cur_time):
-
-        norm_time = cur_time % self.trace['finish_time']
-
-        if norm_time > self.trace['inactive'][self.behavior_index]:
-            self.behavior_index += 1
-
-        self.behavior_index %= len(self.trace['active'])
-
-        if self.trace['active'][self.behavior_index] <= norm_time <= self.trace['inactive'][self.behavior_index]:
-            return True
-
-        return False
-
-    def get_completion_time(self, model_size):
-        return 3 * self.args.batch_size * self.args.epochs * float(self.compute_speed) / 1000 \
-               + 2 * model_size / float(self.bandwidth)
-
-
 class BaseAggregator(ABC):
 
     def __init__(self, worker_num, args, time_mode: TimeMode = TimeMode.NONE):
         self.time_mode = time_mode
-        self.client_sim_data: List[ClientSim] = []
+        self.client_sim_data: List[BaseSim] = []
         self.args = args
 
         self.worker_num = worker_num
@@ -62,23 +37,7 @@ class BaseAggregator(ABC):
 
         self.cur_time = -1
         if time_mode == TimeMode.SIMULATED:
-            self.load_sim_data()
-
-    def load_sim_data(self):
-        script_dir = os.path.dirname(__file__)
-        with open(os.path.join(script_dir, 'client_behave_trace'), 'rb') as tr:
-            trace_data = pickle.load(tr)
-
-        with open(os.path.join(script_dir, 'client_device_capacity'), 'rb') as cp:
-            capacity_data = pickle.load(cp)
-
-        for client_id in range(1, self.args.client_num_in_total + 1):
-            client_sim = ClientSim(
-                trace_data[client_id % len(trace_data)],
-                capacity_data[client_id % len(capacity_data)],
-                self.args
-            )
-            self.client_sim_data.append(client_sim)
+            self.client_sim_data = load_sim_data(self.args)
 
     def is_client_active(self, client_id, time):
         if self.time_mode != TimeMode.SIMULATED:

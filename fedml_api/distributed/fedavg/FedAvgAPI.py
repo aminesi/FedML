@@ -2,7 +2,8 @@ import logging
 
 from mpi4py import MPI
 
-from .FedAVGAggregator import FedAVGAggregator
+# changed to my aggregator with timing
+from .FedAVGAggregatorOO import FedAVGAggregator
 from .FedAVGTrainer import FedAVGTrainer
 from .FedAvgClientManager import FedAVGClientManager
 from .FedAvgServerManager import FedAVGServerManager

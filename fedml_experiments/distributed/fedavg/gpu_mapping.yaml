@@ -9,7 +9,7 @@
 
 # this is used for 10 clients and 1 server training within a single machine which has 4 GPUs
 mapping_default:
-    localhost: [5]
+    localhost: [4]
 
 # this is used for 4 clients and 1 server training within a single machine which has 4 GPUs
 mapping_config1_5:

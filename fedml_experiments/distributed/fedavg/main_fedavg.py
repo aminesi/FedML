@@ -4,7 +4,7 @@ from mpi4py import MPI
 
 i = MPI.COMM_WORLD.Get_rank()
 
-prefix = 'Client {}'.format(i) if i != 0 else 'Server'
+prefix = 'Worker {}'.format(i) if i != 0 else 'Server'
 
 logging.basicConfig(
     level=logging.NOTSET,

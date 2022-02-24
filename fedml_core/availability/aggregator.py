@@ -1,10 +1,10 @@
 import pickle
 import sys
 from abc import ABC
-from types import Union
 from enum import Enum
 from typing import List
 import logging
+import os
 
 import numpy as np
 
@@ -65,13 +65,14 @@ class BaseAggregator(ABC):
             self.load_sim_data()
 
     def load_sim_data(self):
-        with open('client_behave_trace', 'rb') as tr:
+        script_dir = os.path.dirname(__file__)
+        with open(os.path.join(script_dir, 'client_behave_trace'), 'rb') as tr:
             trace_data = pickle.load(tr)
 
-        with open('client_device_capacity', 'rb') as cp:
+        with open(os.path.join(script_dir, 'client_device_capacity'), 'rb') as cp:
             capacity_data = pickle.load(cp)
 
-        for client_id in range(self.args.client_num_in_total):
+        for client_id in range(1, self.args.client_num_in_total + 1):
             client_sim = ClientSim(
                 trace_data[client_id % len(trace_data)],
                 capacity_data[client_id % len(capacity_data)],
@@ -100,6 +101,7 @@ class BaseAggregator(ABC):
             self.selected_clients = candidates
         else:
             self.selected_clients = self.sample(round_idx, candidates, client_num_per_round)
+        logging.info('Current time is: {}'.format(self.cur_time))
         logging.info('Sampled clients for round {}: {}'.format(round_idx, self.selected_clients))
         return self.selected_clients
 

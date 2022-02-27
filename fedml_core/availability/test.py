@@ -1,6 +1,10 @@
 import argparse
+from scipy import stats
+import pandas as pd
+from IPython.display import display
+import matplotlib.pyplot as plt
 
-from fedml_core.availability.aggregator import BaseAggregator, TimeMode
+from fedml_core.availability.simulation import load_sim_data
 
 
 def add_args(parser):
@@ -9,11 +13,11 @@ def add_args(parser):
     return a parser added with args required by fit
     """
     # Training settings
-    parser.add_argument("--model", type=str, default="mobilenet", metavar="N", help="neural network used in training")
+    parser.add_argument("--model", type=str, default="lr", metavar="N", help="neural network used in training")
 
-    parser.add_argument("--dataset", type=str, default="cifar10", metavar="N", help="dataset used for training")
+    parser.add_argument("--dataset", type=str, default="mnist", metavar="N", help="dataset used for training")
 
-    parser.add_argument("--data_dir", type=str, default="./../../../data/cifar10", help="data directory")
+    parser.add_argument("--data_dir", type=str, default="./../../../data/mnist", help="data directory")
 
     parser.add_argument(
         "--partition_method",
@@ -31,23 +35,23 @@ def add_args(parser):
         "--client_num_in_total", type=int, default=1000, metavar="NN", help="number of workers in a distributed cluster"
     )
 
-    parser.add_argument("--client_num_per_round", type=int, default=4, metavar="NN", help="number of workers")
+    parser.add_argument("--client_num_per_round", type=int, default=3, metavar="NN", help="number of workers")
 
     parser.add_argument(
-        "--batch_size", type=int, default=64, metavar="N", help="input batch size for training (default: 64)"
+        "--batch_size", type=int, default=10, metavar="N", help="input batch size for training (default: 64)"
     )
 
-    parser.add_argument("--client_optimizer", type=str, default="adam", help="SGD with momentum; adam")
+    parser.add_argument("--client_optimizer", type=str, default="sgd", help="SGD with momentum; adam")
 
     parser.add_argument("--backend", type=str, default="MPI", help="Backend for Server and Client")
 
-    parser.add_argument("--lr", type=float, default=0.001, metavar="LR", help="learning rate (default: 0.001)")
+    parser.add_argument("--lr", type=float, default=0.03, metavar="LR", help="learning rate (default: 0.001)")
 
     parser.add_argument("--wd", help="weight decay parameter;", type=float, default=0.0001)
 
-    parser.add_argument("--epochs", type=int, default=5, metavar="EP", help="how many epochs will be trained locally")
+    parser.add_argument("--epochs", type=int, default=1, metavar="EP", help="how many epochs will be trained locally")
 
-    parser.add_argument("--comm_round", type=int, default=10, help="how many round of communications we shoud use")
+    parser.add_argument("--comm_round", type=int, default=3, help="how many round of communications we shoud use")
 
     parser.add_argument(
         "--is_mobile", type=int, default=1, help="whether the program is running on the FedML-Mobile server side"
@@ -91,9 +95,44 @@ def add_args(parser):
 
 
 parser = argparse.ArgumentParser()
-agg = BaseAggregator(10, add_args(parser), TimeMode.SIMULATED)
-candidates = [i for i in range(1000) if agg.is_client_active(i, 0)]
-print(len(candidates))
-for i in range(1000):
-    if not agg.is_client_active(i, 0):
-        print(i)
+args = add_args(parser)
+sim_data = load_sim_data(args)
+
+data_analysis = []
+for data in sim_data:
+    tr = data.trace
+    active = False
+    if tr['active'][0] == 0:
+        tr['active'].pop(0)
+        active = True
+    time = 0
+    total_time = tr['finish_time']
+    active_durations = []
+    inactive_durations = []
+    while True:
+        if not active:
+            arr = tr['active']
+            dur_arr = inactive_durations
+        else:
+            arr = tr['inactive']
+            dur_arr = active_durations
+        if len(arr) == 0:
+            dur_arr.append(total_time - time)
+            break
+
+        change_time = arr.pop(0)
+        dur_arr.append(change_time - time)
+        time = change_time
+        active = not active
+    data_analysis.append({
+        'total_time': total_time,
+        'active_durations': active_durations,
+        'inactive_durations': inactive_durations,
+        'comp_time': data.get_completion_time(553.703125)
+    })
+
+df = pd.DataFrame(data_analysis)
+plt.hist(df['comp_time'])
+plt.show()
+plt.hist(df['total_time'])
+plt.show()

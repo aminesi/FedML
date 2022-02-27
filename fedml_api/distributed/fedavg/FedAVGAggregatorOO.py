@@ -7,7 +7,9 @@ import numpy as np
 import torch
 import wandb
 
-from fedml_core.availability.aggregator import BaseAggregator, TimeMode
+from fedml_core.availability.aggregator import BaseAggregator
+from fedml_core.availability.base_selector import TimeMode
+from .client_selector import RandomSelector
 from .utils import transform_list_to_tensor
 
 
@@ -15,7 +17,7 @@ class FedAVGAggregator(BaseAggregator):
 
     def __init__(self, train_global, test_global, all_train_data_num, train_data_local_dict, test_data_local_dict,
                  train_data_local_num_dict, worker_num, device, args, model_trainer):
-        super().__init__(worker_num, args, TimeMode.SIMULATED)
+        super().__init__(worker_num, args, RandomSelector(TimeMode.SIMULATED))
         self.trainer = model_trainer
 
         self.train_global = train_global
@@ -65,11 +67,6 @@ class FedAVGAggregator(BaseAggregator):
         end_time = time.time()
         logging.info("aggregate time cost: %d" % (end_time - start_time))
         return averaged_params
-
-    def sample(self, round_idx, candidates, client_num_per_round):
-        np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
-        client_indexes = np.random.choice(candidates, client_num_per_round, replace=False)
-        return client_indexes
 
     def _generate_validation_set(self, num_samples=10000):
         if self.args.dataset.startswith("stackoverflow"):

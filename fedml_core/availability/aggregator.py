@@ -40,11 +40,10 @@ class BaseAggregator(ABC):
             client_id]))
 
     def check_whether_all_receive(self):
-        logging.debug('worker_num = {}'.format(self.worker_num))
-        for idx in range(self.worker_num):
+        for idx in range(len(self.client_selector.selected_clients)):
             if not self.flag_client_model_uploaded_dict[idx]:
                 return False
-        for idx in range(self.worker_num):
+        for idx in range(len(self.client_selector.selected_clients)):
             self.flag_client_model_uploaded_dict[idx] = False
         return True
 

@@ -10,7 +10,7 @@ import wandb
 
 from fedml_core.availability.aggregator import BaseAggregator
 from fedml_core.availability.base_selector import TimeMode
-from .client_selector import RandomSelector
+from .client_selector import RandomSelector, FedCs
 from .utils import transform_list_to_tensor, transform_tensor_to_list
 
 import pydevd_pycharm
@@ -22,7 +22,7 @@ class FedAVGAggregator(BaseAggregator):
     def __init__(self, train_global, test_global, all_train_data_num, train_data_local_dict, test_data_local_dict,
                  train_data_local_num_dict, worker_num, device, args, model_trainer):
         # used for pycharm debugging
-        # pydevd_pycharm.settrace('localhost', port=41913, stdoutToServer=True, stderrToServer=True)
+        # pydevd_pycharm.settrace('localhost', port=38425, stdoutToServer=True, stderrToServer=True)
 
         self.trainer = model_trainer
         self.train_global = train_global
@@ -38,7 +38,7 @@ class FedAVGAggregator(BaseAggregator):
         if args.is_mobile == 1:
             params = transform_tensor_to_list(params)
         model_size = sys.getsizeof(pickle.dumps(params)) / 1024.0 * 8
-        client_selector = RandomSelector(model_size, train_data_local_num_dict, TimeMode.SIMULATED)
+        client_selector = FedCs(model_size, train_data_local_num_dict, TimeMode.SIMULATED)
 
         super().__init__(worker_num, args, client_selector)
         self.val_global = self._generate_validation_set()
@@ -54,7 +54,7 @@ class FedAVGAggregator(BaseAggregator):
         model_list = []
         training_num = 0
 
-        for idx in range(self.worker_num):
+        for idx in range(len(self.client_selector.selected_clients)):
             if self.args.is_mobile == 1:
                 self.model_dict[idx] = transform_list_to_tensor(self.model_dict[idx])
             model_list.append((self.sample_num_dict[idx], self.model_dict[idx]))

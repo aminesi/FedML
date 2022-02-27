@@ -1,6 +1,6 @@
 import numpy as np
 
-from fedml_core.availability.base_selector import BaseSelector
+from fedml_core.availability.base_selector import BaseSelector, TimeMode
 
 
 class RandomSelector(BaseSelector):
@@ -12,10 +12,10 @@ class RandomSelector(BaseSelector):
         return client_indexes
 
 
-class FedCs:
-    def __init__(self, round_limit, get_client_completion_time) -> None:
-        self.round_limit = round_limit
-        self.get_client_completion_time = get_client_completion_time
+class FedCs(BaseSelector):
+    def __init__(self, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
+        super().__init__(model_size, train_num_dict, time_mode)
+        self.round_limit = 6
 
     def sample(self, round_idx, candidates, client_num_per_round):
         np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round

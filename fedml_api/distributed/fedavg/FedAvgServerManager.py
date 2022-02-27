@@ -16,7 +16,8 @@ except ImportError:
 
 
 class FedAVGServerManager(ServerManager):
-    def __init__(self, args, aggregator, comm=None, rank=0, size=0, backend="MPI", is_preprocessed=False, preprocessed_client_lists=None):
+    def __init__(self, args, aggregator, comm=None, rank=0, size=0, backend="MPI", is_preprocessed=False,
+                 preprocessed_client_lists=None):
         super().__init__(args, comm, rank, size, backend)
         self.args = args
         self.aggregator = aggregator
@@ -35,7 +36,7 @@ class FedAVGServerManager(ServerManager):
         global_model_params = self.aggregator.get_global_model_params()
         if self.args.is_mobile == 1:
             global_model_params = transform_tensor_to_list(global_model_params)
-        for process_id in range(1, self.size):
+        for process_id in range(1, len(client_indexes) + 1):
             self.send_message_init_config(process_id, global_model_params, client_indexes[process_id - 1])
 
     def register_message_receive_handlers(self):
@@ -71,13 +72,11 @@ class FedAVGServerManager(ServerManager):
                 # sampling clients
                 client_indexes = self.aggregator.client_sampling(self.round_idx, self.args.client_num_in_total,
                                                                  self.args.client_num_per_round)
-            
-            print('indexes of clients: ' + str(client_indexes))
-            print("size = %d" % self.size)
+
             if self.args.is_mobile == 1:
                 global_model_params = transform_tensor_to_list(global_model_params)
 
-            for receiver_id in range(1, self.size):
+            for receiver_id in range(1, len(client_indexes) + 1):
                 self.send_message_sync_model_to_client(receiver_id, global_model_params,
                                                        client_indexes[receiver_id - 1])
 

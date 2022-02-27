@@ -20,7 +20,7 @@ class FedCs:
     def sample(self, round_idx, candidates, client_num_per_round):
         np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
         indexes = np.random.choice(candidates, client_num_per_round, replace=False)
-        times = map(lambda i: self.get_client_completion_time(self.model_size, i), indexes)
+        times = map(self.get_client_completion_time, indexes)
         client_indexes = []
         for i, time in enumerate(times):
             if time < self.round_limit:

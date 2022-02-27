@@ -34,10 +34,8 @@ class BaseAggregator(ABC):
         self.sample_num_dict[worker_index] = sample_num
         self.flag_client_model_uploaded_dict[worker_index] = True
 
-        model_size = sys.getsizeof(pickle.dumps(model_params)) / 1024.0 * 8
         client_id = self.client_selector.selected_clients[worker_index]
-        self.client_selector.client_times[client_id] = self.client_selector.get_client_completion_time(client_id,
-                                                                                                       model_size)
+        self.client_selector.client_times[client_id] = self.client_selector.get_client_completion_time(client_id)
         logging.info('Aggregator: client {} finished in {} seconds'.format(client_id, self.client_selector.client_times[
             client_id]))
 

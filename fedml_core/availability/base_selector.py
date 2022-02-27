@@ -14,7 +14,7 @@ class TimeMode(Enum):
 
 class BaseSelector:
 
-    def __init__(self, time_mode=TimeMode.NONE) -> None:
+    def __init__(self, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
         self.args = None
         self.client_times = None
 
@@ -22,6 +22,8 @@ class BaseSelector:
         self.client_sim_data: List[BaseSim] = []
         self.selected_clients = []
         self.cur_time = -1
+        self.model_size = model_size
+        self.train_num_dict = train_num_dict
 
     def initialize(self, aggregator_args):
         self.args = aggregator_args
@@ -35,11 +37,11 @@ class BaseSelector:
             return True
         return self.client_sim_data[client_id].is_active(time)
 
-    def get_client_completion_time(self, client_id, model_size):
+    def get_client_completion_time(self, client_id):
         if self.time_mode == TimeMode.NONE:
             return 0
 
-        return self.client_sim_data[client_id].get_completion_time(model_size)
+        return self.client_sim_data[client_id].get_completion_time(self.model_size)
 
     def client_sampling(self, round_idx, client_num_in_total, client_num_per_round):
         if self.cur_time == -1:

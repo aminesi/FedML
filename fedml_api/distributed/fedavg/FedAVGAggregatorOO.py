@@ -1,28 +1,32 @@
 import copy
 import logging
+import pickle
 import random
+import sys
 import time
 
-import numpy as np
 import torch
 import wandb
 
 from fedml_core.availability.aggregator import BaseAggregator
 from fedml_core.availability.base_selector import TimeMode
 from .client_selector import RandomSelector
-from .utils import transform_list_to_tensor
+from .utils import transform_list_to_tensor, transform_tensor_to_list
+
+import pydevd_pycharm
+
 
 
 class FedAVGAggregator(BaseAggregator):
 
     def __init__(self, train_global, test_global, all_train_data_num, train_data_local_dict, test_data_local_dict,
                  train_data_local_num_dict, worker_num, device, args, model_trainer):
-        super().__init__(worker_num, args, RandomSelector(TimeMode.SIMULATED))
-        self.trainer = model_trainer
+        # used for pycharm debugging
+        # pydevd_pycharm.settrace('localhost', port=41913, stdoutToServer=True, stderrToServer=True)
 
+        self.trainer = model_trainer
         self.train_global = train_global
         self.test_global = test_global
-        self.val_global = self._generate_validation_set()
         self.all_train_data_num = all_train_data_num
 
         self.train_data_local_dict = train_data_local_dict
@@ -30,6 +34,14 @@ class FedAVGAggregator(BaseAggregator):
         self.train_data_local_num_dict = train_data_local_num_dict
 
         self.device = device
+        params = self.get_global_model_params()
+        if args.is_mobile == 1:
+            params = transform_tensor_to_list(params)
+        model_size = sys.getsizeof(pickle.dumps(params)) / 1024.0 * 8
+        client_selector = RandomSelector(model_size, train_data_local_num_dict, TimeMode.SIMULATED)
+
+        super().__init__(worker_num, args, client_selector)
+        self.val_global = self._generate_validation_set()
 
     def get_global_model_params(self):
         return self.trainer.get_model_params()

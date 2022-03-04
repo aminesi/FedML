@@ -61,6 +61,22 @@ def add_args(parser):
     parser : argparse.ArgumentParser
     return a parser added with args required by fit
     """
+    # Oort params
+
+    parser.add_argument('--pacer_delta', type=float, default=5)
+    parser.add_argument('--round_threshold', type=float, default=30)
+    parser.add_argument('--exploration_alpha', type=float, default=0.3)
+    parser.add_argument('--exploration_min', type=float, default=0.3)
+    parser.add_argument('--blacklist_max_len', type=float, default=0.3)
+    parser.add_argument('--blacklist_rounds', type=int, default=-1)
+    parser.add_argument('--exploration_decay', type=float, default=0.98)
+    parser.add_argument('--round_penalty', type=float, default=2.0)
+    parser.add_argument('--pacer_step', type=int, default=20)
+    parser.add_argument('--cut_off_util', type=float, default=0.05)  # 95 percentile
+    parser.add_argument('--clip_bound', type=float, default=0.9)
+    parser.add_argument('--sample_window', type=float, default=5.0)
+    parser.add_argument('--exploration_factor', type=float, default=0.9)
+
     # Training settings
     parser.add_argument("--model", type=str, default="mobilenet", metavar="N", help="neural network used in training")
 

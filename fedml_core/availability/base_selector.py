@@ -14,9 +14,9 @@ class TimeMode(Enum):
 
 class BaseSelector:
 
-    def __init__(self, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
-        self.args = None
-        self.client_times = None
+    def __init__(self, aggregator_args, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
+        self.args = aggregator_args
+        self.client_times = np.array([0] * self.args.client_num_in_total).astype(np.float32)
 
         self.time_mode = time_mode
         self.client_sim_data: List[BaseSim] = []
@@ -25,10 +25,6 @@ class BaseSelector:
         self.cur_time = -1
         self.model_size = model_size
         self.train_num_dict = train_num_dict
-
-    def initialize(self, aggregator_args):
-        self.args = aggregator_args
-        self.client_times = np.array([0] * self.args.client_num_in_total).astype(np.float32)
 
         if self.time_mode == TimeMode.SIMULATED:
             self.client_sim_data = load_sim_data(self.args)

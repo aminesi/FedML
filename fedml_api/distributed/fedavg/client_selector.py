@@ -1,5 +1,8 @@
+import logging
+
 import numpy as np
 
+from fedml_api.distributed.fedavg.oort import OortHelper
 from fedml_core.availability.base_selector import BaseSelector, TimeMode
 
 
@@ -14,8 +17,9 @@ class RandomSelector(BaseSelector):
 
 
 class FedCs(BaseSelector):
-    def __init__(self, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
-        super().__init__(model_size, train_num_dict, time_mode)
+
+    def __init__(self, aggregator_args, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
+        super().__init__(aggregator_args, model_size, train_num_dict, time_mode)
         self.round_limit = 6
 
     def sample(self, round_idx, candidates, client_num_per_round):
@@ -30,9 +34,27 @@ class FedCs(BaseSelector):
         return client_indexes
 
 
+class Oort(BaseSelector):
+
+    def __init__(self, aggregator_args, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
+        super().__init__(aggregator_args, model_size, train_num_dict, time_mode)
+        self.helper = OortHelper(self.args)
+        for client_id in range(self.args.client_num_in_total):
+            feedbacks = {'reward': min(self.train_num_dict[client_id], self.args.epochs * self.args.batch_size),
+                         'duration': self.get_client_completion_time(client_id)}
+            self.helper.register_client(client_id, feedbacks)
+
+    def sample(self, round_idx, candidates, client_num_per_round):
+        # np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
+        num_clients = min(client_num_per_round, len(candidates))
+        client_indexes = np.random.choice(candidates, num_clients, replace=False)
+        return client_indexes
+
+
 class TiFL(BaseSelector):
-    def __init__(self, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
-        super().__init__(model_size, train_num_dict, time_mode)
+
+    def __init__(self, aggregator_args, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
+        super().__init__(aggregator_args, model_size, train_num_dict, time_mode)
         self.tier_count = 5
         self.tiers = [[] for _ in range(self.tier_count)]
         self.selected_tier = 0
@@ -41,9 +63,6 @@ class TiFL(BaseSelector):
         self.update_interval = 50
         self.old_tiers_acc = None
         self.tiers_acc = None
-
-    def initialize(self, aggregator_args):
-        super().initialize(aggregator_args)
         self.assign_clients_to_tiers()
 
     def assign_clients_to_tiers(self):

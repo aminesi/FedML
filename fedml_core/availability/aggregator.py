@@ -13,7 +13,6 @@ class BaseAggregator(ABC):
 
         self.args = args
         self.client_selector = client_selector
-        self.client_selector.initialize(args)
         self.worker_num = worker_num
 
         self.model_dict = dict()

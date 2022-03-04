@@ -1,6 +1,4 @@
-from collections import OrderedDict
-# from .utils.lp import *
-import math, numpy
+import math
 
 from random import Random
 from collections import OrderedDict
@@ -96,7 +94,7 @@ class OortHelper:
 
         logging.info(
             "Training selector: Pacer {}: lastExploitationUtil {}, lastExplorationUtil {}, last_util_record {}".
-            format(self.training_round, lastExploitationUtil, lastExplorationUtil, self.last_util_record))
+                format(self.training_round, lastExploitationUtil, lastExplorationUtil, self.last_util_record))
 
     def update_client_util(self, clientId, feedbacks):
         """
@@ -266,8 +264,9 @@ class OortHelper:
 
         logging.info(
             "At round {}, UCB exploited {}, augment_factor {}, exploreLen {}, un-explored {}, exploration {}, round_threshold {}, sampled score is {}"
-            .format(cur_time, numOfExploited, augment_factor / max(1e-4, exploitLen), exploreLen, len(self.unexplored),
-                    self.exploration, self.round_threshold, top_k_score))
+                .format(cur_time, numOfExploited, augment_factor / max(1e-4, exploitLen), exploreLen,
+                        len(self.unexplored),
+                        self.exploration, self.round_threshold, top_k_score))
         # logging.info("At time {}, all rewards are {}".format(cur_time, allloss))
 
         return pickedClients

@@ -3,6 +3,7 @@ from scipy import stats
 import pandas as pd
 from IPython.display import display
 import matplotlib.pyplot as plt
+import numpy as np
 
 from fedml_core.availability.simulation import load_sim_data
 
@@ -107,6 +108,7 @@ for data in sim_data:
         active = True
     time = 0
     total_time = tr['finish_time']
+    status_change = len(tr['active'])
     active_durations = []
     inactive_durations = []
     while True:
@@ -127,12 +129,22 @@ for data in sim_data:
     data_analysis.append({
         'total_time': total_time,
         'active_durations': active_durations,
+        'status_change': status_change,
         'inactive_durations': inactive_durations,
         'comp_time': data.get_completion_time(553.703125)
     })
 
 df = pd.DataFrame(data_analysis)
-plt.hist(df['comp_time'])
-plt.show()
-plt.hist(df['total_time'])
-plt.show()
+df['active_percent'] = df['active_durations'].apply(sum) / df['total_time'] * 100
+
+for c in df.columns:
+    plt.figure()
+    label = c
+    data = df[c]
+    if 'durations' in c:
+        label = 'mean_' + c[:-1]
+        data = df[c].apply(np.mean)
+    plt.hist(data, rwidth=0.9)
+    plt.xlabel(label)
+    plt.ylabel('number of clients')
+    plt.show()

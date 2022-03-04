@@ -2,6 +2,7 @@ import logging
 
 import torch
 from torch import nn
+import numpy as np
 
 try:
     from fedml_core.trainer.model_trainer import ModelTrainer
@@ -64,7 +65,8 @@ class MyModelTrainer(ModelTrainer):
             'test_total': 0
         }
 
-        criterion = nn.CrossEntropyLoss().to(device)
+        criterion = nn.CrossEntropyLoss(reduction='none').to(device)
+        oort_scores = []
 
         with torch.no_grad():
             for batch_idx, (x, target) in enumerate(test_data):
@@ -72,13 +74,17 @@ class MyModelTrainer(ModelTrainer):
                 target = target.to(device)
                 pred = model(x)
                 loss = criterion(pred, target)
-
+                oort_scores += loss.tolist()
+                loss = loss.mean()
                 _, predicted = torch.max(pred, -1)
                 correct = predicted.eq(target).sum()
 
                 metrics['test_correct'] += correct.item()
                 metrics['test_loss'] += loss.item() * target.size(0)
                 metrics['test_total'] += target.size(0)
+            oort_scores = np.array(oort_scores)
+            sample_count = len(oort_scores)
+            metrics['oort_score'] = np.sqrt((oort_scores ** 2).sum() / sample_count) * sample_count
         return metrics
 
     def test_on_the_server(self, train_data_local_dict, test_data_local_dict, device, args=None) -> bool:

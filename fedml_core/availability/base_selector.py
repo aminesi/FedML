@@ -21,6 +21,7 @@ class BaseSelector:
         self.time_mode = time_mode
         self.client_sim_data: List[BaseSim] = []
         self.selected_clients = []
+        self.clients_training_metrics = {}
         self.cur_time = -1
         self.model_size = model_size
         self.train_num_dict = train_num_dict

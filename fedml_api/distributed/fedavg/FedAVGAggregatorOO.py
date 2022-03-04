@@ -16,13 +16,12 @@ from .utils import transform_list_to_tensor, transform_tensor_to_list
 import pydevd_pycharm
 
 
-
 class FedAVGAggregator(BaseAggregator):
 
     def __init__(self, train_global, test_global, all_train_data_num, train_data_local_dict, test_data_local_dict,
                  train_data_local_num_dict, worker_num, device, args, model_trainer):
         # used for pycharm debugging
-        # pydevd_pycharm.settrace('localhost', port=38425, stdoutToServer=True, stderrToServer=True)
+        pydevd_pycharm.settrace('localhost', port=40423, stdoutToServer=True, stderrToServer=True)
 
         self.trainer = model_trainer
         self.train_global = train_global
@@ -91,6 +90,11 @@ class FedAVGAggregator(BaseAggregator):
             return self.test_global
 
     def test_on_server_for_all_clients(self, round_idx):
+        for client_idx in self.client_selector.selected_clients:
+            # train data
+            metrics = self.trainer.test(self.train_data_local_dict[client_idx], self.device, self.args)
+            self.client_selector.clients_training_metrics[client_idx] = metrics
+
         if self.trainer.test_on_the_server(self.train_data_local_dict, self.test_data_local_dict, self.device,
                                            self.args):
             return

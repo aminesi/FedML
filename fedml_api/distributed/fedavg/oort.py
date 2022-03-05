@@ -1,16 +1,15 @@
 import math
 
-from random import Random
 from collections import OrderedDict
 import logging
-import numpy as np2
+import numpy as np
 
 
 class OortHelper:
     """Oort's training selector
     """
 
-    def __init__(self, args, sample_seed=233):
+    def __init__(self, args):
 
         self.totalArms = OrderedDict()
         self.training_round = 0
@@ -20,8 +19,6 @@ class OortHelper:
         self.exploration_min = args.exploration_min
         self.alpha = args.exploration_alpha
 
-        self.rng = Random()
-        self.rng.seed(sample_seed)
         self.unexplored = set()
         self.args = args
         self.round_threshold = args.round_threshold
@@ -35,8 +32,6 @@ class OortHelper:
         self.exploreClients = []
         self.successfulClients = set()
         self.blacklist = None
-
-        np2.random.seed(sample_seed)
 
     def register_client(self, clientId, feedbacks):
         # Initiate the score for arms. [score, time_stamp, # of trials, size of client, auxi, duration]
@@ -147,6 +142,7 @@ class OortHelper:
 
     def getTopK(self, numOfSamples, cur_time, feasible_clients):
         self.training_round = cur_time
+        np.random.seed(cur_time)
         self.blacklist = self.get_blacklist()
 
         self.pacer()
@@ -209,24 +205,24 @@ class OortHelper:
         # take the top-k, and then sample by probability, take 95% of the cut-off loss
         sortedClientUtil = sorted(scores, key=scores.get, reverse=True)
 
-        # take cut-off utility
-        cut_off_util = scores[sortedClientUtil[exploitLen]] * self.args.cut_off_util
+        augment_factor = 0
+        if exploitLen > 0:
+            # take cut-off utility
+            cut_off_util = scores[sortedClientUtil[exploitLen - 1]] * self.args.cut_off_util
 
-        tempPickedClients = []
-        for clientId in sortedClientUtil:
-            # we want at least 10 times of clients for augmentation
-            if scores[clientId] < cut_off_util and len(tempPickedClients) > 10. * exploitLen:
-                break
-            tempPickedClients.append(clientId)
+            tempPickedClients = []
+            for clientId in sortedClientUtil:
+                # we want at least 10 times of clients for augmentation
+                if scores[clientId] < cut_off_util and len(tempPickedClients) > 10. * exploitLen:
+                    break
+                tempPickedClients.append(clientId)
 
-        augment_factor = len(tempPickedClients)
+            augment_factor = len(tempPickedClients)
 
-        totalSc = max(1e-4, float(sum([scores[key] for key in tempPickedClients])))
-        self.exploitClients = list(
-            np2.random.choice(tempPickedClients, exploitLen, p=[scores[key] / totalSc for key in tempPickedClients],
-                              replace=False))
-
-        pickedClients = []
+            totalSc = max(1e-4, float(sum([scores[key] for key in tempPickedClients])))
+            self.exploitClients = list(
+                np.random.choice(tempPickedClients, exploitLen, p=[scores[key] / totalSc for key in tempPickedClients],
+                                 replace=False))
 
         # exploration
         _unexplored = [x for x in list(self.unexplored) if int(x) in feasible_clients]
@@ -247,15 +243,15 @@ class OortHelper:
 
             unexploredSc = float(sum([init_reward[key] for key in pickedUnexploredClients]))
 
-            pickedUnexplored = list(np2.random.choice(pickedUnexploredClients, exploreLen,
-                                                      p=[init_reward[key] / max(1e-4, unexploredSc) for key in
-                                                         pickedUnexploredClients], replace=False))
+            pickedUnexplored = list(np.random.choice(pickedUnexploredClients, exploreLen,
+                                                     p=[init_reward[key] / max(1e-4, unexploredSc) for key in
+                                                        pickedUnexploredClients], replace=False))
 
             self.exploreClients = pickedUnexplored
 
         pickedClients = self.exploreClients + self.exploitClients
         top_k_score = []
-        for i in range(min(3, len(pickedClients))):
+        for i in range(len(pickedClients)):
             clientId = pickedClients[i]
             _score = (self.totalArms[clientId]['reward'] - min_reward) / range_reward
             _staleness = self.alpha * ((cur_time - self.totalArms[clientId]['time_stamp']) - min_staleness) / float(

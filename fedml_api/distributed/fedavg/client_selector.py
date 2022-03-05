@@ -45,10 +45,20 @@ class Oort(BaseSelector):
             self.helper.register_client(client_id, feedbacks)
 
     def sample(self, round_idx, candidates, client_num_per_round):
-        # np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
+        if round_idx != 0:
+            self.update_oort_helper(round_idx)
         num_clients = min(client_num_per_round, len(candidates))
-        client_indexes = np.random.choice(candidates, num_clients, replace=False)
+        client_indexes = self.helper.select_participant(num_clients, candidates)
         return client_indexes
+
+    def update_oort_helper(self, round_idx):
+        for client in self.selected_clients:
+            self.helper.update_client_util(client, {
+                'reward': self.clients_training_metrics[client]['oort_score'],
+                'duration': self.client_times[client],
+                'status': True,
+                'time_stamp': round_idx
+            })
 
 
 class TiFL(BaseSelector):

@@ -46,10 +46,7 @@ class BaseSelector:
         else:
             self.cur_time += np.max(self.client_times[self.selected_clients])
         candidates = [i for i in range(client_num_in_total) if self.is_client_active(i, self.cur_time)]
-        if len(candidates) <= client_num_per_round:
-            self.selected_clients = candidates
-        else:
-            self.selected_clients = self.sample(round_idx, candidates, client_num_per_round)
+        self.selected_clients = self.sample(round_idx, candidates, client_num_per_round)
         logging.info('Current time is: {}'.format(self.cur_time))
         logging.info('Sampled clients for round {}: {}'.format(round_idx, self.selected_clients))
         return self.selected_clients

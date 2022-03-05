@@ -206,6 +206,7 @@ class OortHelper:
         sortedClientUtil = sorted(scores, key=scores.get, reverse=True)
 
         augment_factor = 0
+        self.exploitClients = []
         if exploitLen > 0:
             # take cut-off utility
             cut_off_util = scores[sortedClientUtil[exploitLen - 1]] * self.args.cut_off_util
@@ -226,6 +227,7 @@ class OortHelper:
 
         # exploration
         _unexplored = [x for x in list(self.unexplored) if int(x) in feasible_clients]
+        self.exploreClients = []
         if len(_unexplored) > 0:
             init_reward = {}
             for cl in _unexplored:
@@ -238,16 +240,17 @@ class OortHelper:
 
             # prioritize w/ some rewards (i.e., size)
             exploreLen = min(len(_unexplored), numOfSamples - len(self.exploitClients))
-            pickedUnexploredClients = sorted(init_reward, key=init_reward.get, reverse=True)[
-                                      :min(int(self.sample_window * exploreLen), len(init_reward))]
+            if exploreLen > 0:
+                pickedUnexploredClients = sorted(init_reward, key=init_reward.get, reverse=True)[
+                                          :min(int(self.sample_window * exploreLen), len(init_reward))]
 
-            unexploredSc = float(sum([init_reward[key] for key in pickedUnexploredClients]))
+                unexploredSc = float(sum([init_reward[key] for key in pickedUnexploredClients]))
 
-            pickedUnexplored = list(np.random.choice(pickedUnexploredClients, exploreLen,
-                                                     p=[init_reward[key] / max(1e-4, unexploredSc) for key in
-                                                        pickedUnexploredClients], replace=False))
+                pickedUnexplored = list(np.random.choice(pickedUnexploredClients, exploreLen,
+                                                         p=[init_reward[key] / max(1e-4, unexploredSc) for key in
+                                                            pickedUnexploredClients], replace=False))
 
-            self.exploreClients = pickedUnexplored
+                self.exploreClients = pickedUnexplored
 
         pickedClients = self.exploreClients + self.exploitClients
         top_k_score = []

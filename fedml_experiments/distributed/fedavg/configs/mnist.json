@@ -1,0 +1,14 @@
+{
+  "gpu_mapping_key": "mnist",
+  "model": "lr",
+  "dataset": "mnist",
+  "data_dir": "./../../../data/mnist",
+  "partition_method": "hetero",
+  "client_num_in_total": 1000,
+  "client_num_per_round": 3,
+  "comm_round": 3,
+  "epochs": 2,
+  "client_optimizer": "sgd",
+  "batch_size": 10,
+  "lr": 0.03
+}

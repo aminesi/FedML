@@ -57,3 +57,5 @@ data/fednlp/*
 *.npz
 
 *.jpg
+
+!fedml_experiments/distributed/fedavg/configs/*

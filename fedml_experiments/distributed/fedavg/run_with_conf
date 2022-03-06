@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+conf_file="$SCRIPT_DIR/configs/$1"
+
+keys=$(jq "keys[]" "$conf_file")
+
+args=""
+for key in $keys; do
+  val=$(jq ".$key" "$conf_file")
+  key_val="--${key//\"/} ${val//\"/}"
+  args="$args $key_val"
+  if [ "${key//\"/}" = "client_num_per_round" ]; then
+    PROCESS_NUM=$(("$val" + 1))
+  fi
+done
+
+echo $PROCESS_NUM
+
+hostname > mpi_host_file
+
+wandb login de2baeecb9db7ce75202bef9bc58e3aa6125452b
+wandb off
+
+# shellcheck disable=SC2086
+mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./main_fedavg.py $args

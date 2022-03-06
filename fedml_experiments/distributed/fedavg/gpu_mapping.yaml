@@ -11,6 +11,9 @@
 mapping_default:
     localhost: [4]
 
+mnist:
+    localhost: [4]
+
 # this is used for 4 clients and 1 server training within a single machine which has 4 GPUs
 mapping_config1_5:
     host1: [2, 1, 1, 1]

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+cd "$SCRIPT_DIR"
+cd ../
+
+conf_file="$(pwd)/configs/$1"
+
+keys=$(jq "keys[]" "$conf_file")
+
+args=""
+for key in $keys; do
+  val=$(jq ".$key" "$conf_file")
+  key_val="--${key//\"/} ${val//\"/}"
+  args="$args $key_val"
+  if [ "${key//\"/}" = "client_num_per_round" ]; then
+    PROCESS_NUM=$(("$val" + 1))
+  fi
+done
+
+echo $PROCESS_NUM
+
+wandb login de2baeecb9db7ce75202bef9bc58e3aa6125452b
+wandb off
+
+# shellcheck disable=SC2086
+srun python3 ./main_fedavg.py $args

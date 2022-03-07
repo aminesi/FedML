@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "./../../../../")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "./../../../")))
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "")))
-from fedml_api.distributed.utils.gpu_mapping import mapping_processes_to_gpu_device_from_yaml_file
+from fedml_api.distributed.utils.gpu_mapping import mapping_processes_to_gpu_device_from_yaml_file, map_single_gpu
 from fedml_api.data_preprocessing.FederatedEMNIST.data_loader import load_partition_data_federated_emnist
 from fedml_api.data_preprocessing.fed_cifar100.data_loader import load_partition_data_federated_cifar100
 from fedml_api.data_preprocessing.fed_shakespeare.data_loader import load_partition_data_federated_shakespeare
@@ -478,10 +478,11 @@ if __name__ == "__main__":
 
     # Please check "GPU_MAPPING.md" to see how to define the topology
     logging.info("process_id = %d, size = %d" % (process_id, worker_number))
-    device = mapping_processes_to_gpu_device_from_yaml_file(
-        process_id, worker_number, args.gpu_mapping_file, args.gpu_mapping_key
-    )
+    # device = mapping_processes_to_gpu_device_from_yaml_file(
+    #     process_id, worker_number, args.gpu_mapping_file, args.gpu_mapping_key
+    # )
 
+    device = map_single_gpu()
     # load data
     dataset = load_data(args, args.dataset)
     [

@@ -37,3 +37,11 @@ def mapping_processes_to_gpu_device_from_yaml_file(process_id, worker_number, gp
         logging.info("process_id = {}, GPU device = {}".format(process_id, device))
         # return gpu_util_map[process_id][1]
         return device
+
+
+def map_single_gpu():
+    if torch.cuda.is_available():
+        torch.cuda.set_device(0)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    logging.info("GPU device in use = {}".format(torch.cuda.get_device_properties(device)))
+    return device

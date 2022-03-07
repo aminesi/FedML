@@ -6,8 +6,8 @@
   "partition_method": "hetero",
   "client_num_per_round": 1,
   "comm_round": 3,
-  "epochs": 2,
+  "epochs": 1,
   "client_optimizer": "sgd",
-  "batch_size": 10,
-  "lr": 0.03
+  "batch_size": 20,
+  "lr": 0.1
 }

@@ -23,5 +23,10 @@ hostname > mpi_host_file
 wandb login de2baeecb9db7ce75202bef9bc58e3aa6125452b
 wandb off
 
+OUTPUT_DIR="./results/$(date '+%Y-%m-%dT%H:%M:%S.%3N%z')/"
+args="$args --output_dir $OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR"
+cp "$conf_file" "$OUTPUT_DIR"
+
 # shellcheck disable=SC2086
 mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./main_fedavg.py $args

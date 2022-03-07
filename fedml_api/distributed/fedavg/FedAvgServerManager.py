@@ -2,6 +2,8 @@ import logging
 import os, signal
 import sys
 
+import torch
+
 from .message_define import MyMessage
 from .utils import transform_tensor_to_list, post_complete_message_to_sweep_process
 
@@ -58,6 +60,7 @@ class FedAVGServerManager(ServerManager):
             # start the next round
             self.round_idx += 1
             if self.round_idx == self.round_num:
+                self.save_model()
                 # post_complete_message_to_sweep_process(self.args)
                 self.finish()
                 print('here')
@@ -92,3 +95,14 @@ class FedAVGServerManager(ServerManager):
         message.add_params(MyMessage.MSG_ARG_KEY_MODEL_PARAMS, global_model_params)
         message.add_params(MyMessage.MSG_ARG_KEY_CLIENT_INDEX, str(client_index))
         self.send_message(message)
+
+    def save_model(self):
+        path = self.args.output_dir
+        torch.save(self.aggregator.get_global_model_params(), path + 'model.pth')
+        args = []
+        for arg in vars(self.args):
+            args.append('{} = {}'.format(arg, getattr(self.args, arg)))
+        args = '\n'.join(args)
+
+        with open(path + 'args.txt', 'w') as f:
+            f.write(args)

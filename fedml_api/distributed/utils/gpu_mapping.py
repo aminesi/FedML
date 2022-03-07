@@ -1,4 +1,5 @@
 import logging
+import os
 import socket
 
 import torch
@@ -43,5 +44,12 @@ def map_single_gpu():
     if torch.cuda.is_available():
         torch.cuda.set_device(0)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    logging.info("GPU device in use = {}".format(torch.cuda.get_device_properties(device)))
+
+    devices = ''
+    if 'CUDA_VISIBLE_DEVICES' in os.environ:
+        devices = os.environ['CUDA_VISIBLE_DEVICES']
+    logging.info("Hostname = {}\n\t\t\tCUDA_VISIBLE_DEVICES = {}\n\t\t\tGPU device in use = {}".format(
+        socket.gethostname(),
+        devices,
+        torch.cuda.get_device_properties(device)))
     return device

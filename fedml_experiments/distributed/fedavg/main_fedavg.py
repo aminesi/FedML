@@ -430,12 +430,7 @@ if __name__ == "__main__":
     # parse python script input parameters
     parser = argparse.ArgumentParser()
     args = add_args(parser)
-    args_str = []
-    for arg in vars(args):
-        args_str.append('{} = {}'.format(arg, getattr(args, arg)))
-    args_str = '\n'.join(args_str)
-    if process_id == 0:
-        logging.info('Args:\n' + args_str)
+
 
     # customize the process name
     str_process_name = "FedAvg (distributed):" + str(process_id)
@@ -506,6 +501,13 @@ if __name__ == "__main__":
     # Note if the model is DNN (e.g., ResNet), the training will be very slow.
     # In this case, please use our FedML distributed version (./fedml_experiments/distributed_fedavg)
     model = create_model(args, model_name=args.model, output_dim=dataset[7])
+
+    args_str = []
+    for arg in vars(args):
+        args_str.append('{} = {}'.format(arg, getattr(args, arg)))
+    args_str = '\n'.join(args_str)
+    if process_id == 0:
+        logging.info('Args:\n' + args_str)
 
     # start distributed training
     FedML_FedAvg_distributed(

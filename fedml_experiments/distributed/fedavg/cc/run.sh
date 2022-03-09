@@ -4,7 +4,7 @@
 #SBATCH --output=%x.out
 #SBATCH --ntasks=11
 #SBATCH --cpus-per-task=4
-#SBATCH --gpus-per-task=1
+#SBATCH --gpus-per-task=v100l:1
 #SBATCH --mem-per-cpu=2G
 #SBATCH --gpu-bind=single:1
 

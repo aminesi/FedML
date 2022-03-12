@@ -22,7 +22,7 @@ for key in $keys; do
 done
 
 
-wandb login de2baeecb9db7ce75202bef9bc58e3aa6125452b
+#wandb login de2baeecb9db7ce75202bef9bc58e3aa6125452b
 wandb off
 
 OUTPUT_DIR="./results/$(date '+%Y-%m-%dT%H:%M:%S.%3N%z')/"

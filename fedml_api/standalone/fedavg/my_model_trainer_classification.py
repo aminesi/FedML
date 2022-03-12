@@ -42,7 +42,7 @@ class MyModelTrainer(ModelTrainer):
                 loss.backward()
 
                 # Uncommet this following line to avoid nan loss
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 2.0)
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 4.0)
 
                 optimizer.step()
                 # logging.info('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(

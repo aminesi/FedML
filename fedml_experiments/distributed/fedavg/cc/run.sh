@@ -10,7 +10,7 @@
 
 cd ~/scratch/FedML
 
-module load python/3.8 StdEnv/2020  gcc/10.3.0  openmpi/4.1.1 mpi4py/3.1.3
+
 source venv/bin/activate
 
 cd ./fedml_experiments/distributed/fedavg/

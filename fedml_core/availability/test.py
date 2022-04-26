@@ -14,11 +14,11 @@ def add_args(parser):
     return a parser added with args required by fit
     """
     # Training settings
-    parser.add_argument("--model", type=str, default="lr", metavar="N", help="neural network used in training")
+    parser.add_argument("--model", type=str, default="cnn", metavar="N", help="neural network used in training")
 
     parser.add_argument("--dataset", type=str, default="mnist", metavar="N", help="dataset used for training")
 
-    parser.add_argument("--data_dir", type=str, default="./../../../data/mnist", help="data directory")
+    parser.add_argument("--data_dir", type=str, default="./../../../data/FederatedEMNIST", help="data directory")
 
     parser.add_argument(
         "--partition_method",
@@ -39,7 +39,7 @@ def add_args(parser):
     parser.add_argument("--client_num_per_round", type=int, default=3, metavar="NN", help="number of workers")
 
     parser.add_argument(
-        "--batch_size", type=int, default=10, metavar="N", help="input batch size for training (default: 64)"
+        "--batch_size", type=int, default=20, metavar="N", help="input batch size for training (default: 64)"
     )
 
     parser.add_argument("--client_optimizer", type=str, default="sgd", help="SGD with momentum; adam")

@@ -59,8 +59,9 @@ class FedAVGServerManager(ServerManager):
 
             # start the next round
             self.round_idx += 1
-            if self.round_idx == self.round_num:
+            if self.round_idx in self.args.checkpoints:
                 self.save_model()
+            if self.round_idx == self.round_num:
                 # post_complete_message_to_sweep_process(self.args)
                 self.finish()
                 print('here')
@@ -98,7 +99,7 @@ class FedAVGServerManager(ServerManager):
 
     def save_model(self):
         path = self.args.output_dir
-        torch.save(self.aggregator.get_global_model_params(), path + 'model.pth')
+        torch.save(self.aggregator.get_global_model_params(), path + 'model-{}.pth'.format(self.round_idx))
         args = []
         for arg in vars(self.args):
             args.append('{} = {}'.format(arg, getattr(self.args, arg)))

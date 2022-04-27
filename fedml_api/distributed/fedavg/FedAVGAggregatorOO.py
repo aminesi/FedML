@@ -37,7 +37,14 @@ class FedAVGAggregator(BaseAggregator):
         if args.is_mobile == 1:
             params = transform_tensor_to_list(params)
         model_size = sys.getsizeof(pickle.dumps(params)) / 1024.0 * 8
-        client_selector = RandomSelector(args, model_size, train_data_local_num_dict)
+        if args.selector == 'random':
+            client_selector = RandomSelector(args, model_size, train_data_local_num_dict)
+        elif args.selector == 'fedcs':
+            client_selector = FedCs(args, model_size, train_data_local_num_dict)
+        elif args.selector == 'oort':
+            client_selector = Oort(args, model_size, train_data_local_num_dict)
+        else:
+            raise AttributeError('Unknown clients selector. selector can be "random" or "fedcs" or "oort"')
 
         super().__init__(worker_num, args, client_selector)
         self.val_global = self._generate_validation_set()

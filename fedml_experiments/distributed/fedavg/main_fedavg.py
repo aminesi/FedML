@@ -63,6 +63,7 @@ def add_args(parser):
     """
     parser.add_argument('--output_dir', type=str, default='./')
     parser.add_argument('--time_mode', type=str, default='none')  # "none" or "simulated"
+    parser.add_argument('--selector', type=str, default='random')  # "random" or "fedcs" or "oort"
     parser.add_argument('--checkpoints', nargs='+', type=int, default=[])
     # Oort params
 

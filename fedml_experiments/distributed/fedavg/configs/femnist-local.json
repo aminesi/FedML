@@ -11,5 +11,6 @@
   "batch_size": 20,
   "lr": 0.1,
   "checkpoints": "2 3",
-  "time_mode": "simulated"
+  "time_mode": "simulated",
+  "selector": "random"
 }

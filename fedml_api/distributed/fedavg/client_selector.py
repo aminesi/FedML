@@ -18,8 +18,8 @@ class RandomSelector(BaseSelector):
 
 class FedCs(BaseSelector):
 
-    def __init__(self, aggregator_args, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
-        super().__init__(aggregator_args, model_size, train_num_dict, time_mode)
+    def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
+        super().__init__(aggregator_args, model_size, train_num_dict)
         self.round_limit = 6
 
     def sample(self, round_idx, candidates, client_num_per_round):
@@ -36,8 +36,8 @@ class FedCs(BaseSelector):
 
 class Oort(BaseSelector):
 
-    def __init__(self, aggregator_args, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
-        super().__init__(aggregator_args, model_size, train_num_dict, time_mode)
+    def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
+        super().__init__(aggregator_args, model_size, train_num_dict)
         self.helper = OortHelper(self.args)
         for client_id in range(self.args.client_num_in_total):
             feedbacks = {'reward': min(self.train_num_dict[client_id], self.args.epochs * self.args.batch_size),
@@ -63,8 +63,8 @@ class Oort(BaseSelector):
 
 class TiFL(BaseSelector):
 
-    def __init__(self, aggregator_args, model_size, train_num_dict, time_mode=TimeMode.NONE) -> None:
-        super().__init__(aggregator_args, model_size, train_num_dict, time_mode)
+    def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
+        super().__init__(aggregator_args, model_size, train_num_dict)
         self.tier_count = 5
         self.tiers = [[] for _ in range(self.tier_count)]
         self.selected_tier = 0

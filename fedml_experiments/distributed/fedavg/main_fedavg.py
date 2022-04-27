@@ -62,6 +62,7 @@ def add_args(parser):
     return a parser added with args required by fit
     """
     parser.add_argument('--output_dir', type=str, default='./')
+    parser.add_argument('--time_mode', type=str, default='none')  # "none" or "simulated"
     parser.add_argument('--checkpoints', nargs='+', type=int, default=[])
     # Oort params
 

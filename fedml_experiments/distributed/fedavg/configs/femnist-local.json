@@ -10,5 +10,6 @@
   "client_optimizer": "sgd",
   "batch_size": 20,
   "lr": 0.1,
-  "checkpoints": "2 3"
+  "checkpoints": "2 3",
+  "time_mode": "simulated"
 }

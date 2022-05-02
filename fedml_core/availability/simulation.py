@@ -12,6 +12,9 @@ class BaseSim(ABC):
     def get_completion_time(self, model_size):
         pass
 
+    def active_till_the_end(self, cur_time, model_size):
+        pass
+
 
 class ClientSim(BaseSim):
     def __init__(self, trace, speed, args):
@@ -25,14 +28,27 @@ class ClientSim(BaseSim):
 
         norm_time = cur_time % self.trace['finish_time']
 
-        if norm_time > self.trace['inactive'][self.behavior_index]:
+        while norm_time > self.trace['inactive'][self.behavior_index]:
+            if self.behavior_index == 0 and norm_time > self.trace['inactive'][-1]:
+                break
             self.behavior_index += 1
-
-        self.behavior_index %= len(self.trace['active'])
+            self.behavior_index %= len(self.trace['active'])
 
         if self.trace['active'][self.behavior_index] <= norm_time <= self.trace['inactive'][self.behavior_index]:
             return True
 
+        return False
+
+    def active_till_the_end(self, cur_time, model_size):
+        if not self.is_active(cur_time):
+            return False
+        end_time = cur_time + self.get_completion_time(model_size)
+        norm_time = cur_time % self.trace['finish_time']
+        end_norm = end_time % self.trace['finish_time']
+        if end_norm < norm_time:
+            end_norm = end_norm + self.trace['finish_time']
+        if end_norm <= self.trace['inactive'][self.behavior_index]:
+            return True
         return False
 
     def get_completion_time(self, model_size):

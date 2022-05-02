@@ -45,5 +45,3 @@ class BaseAggregator(ABC):
         for idx in range(len(self.client_selector.selected_clients)):
             self.flag_client_model_uploaded_dict[idx] = False
         return True
-
-# TODO handle availability change mid training

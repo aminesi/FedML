@@ -23,10 +23,12 @@ class BaseSelector:
             self.time_mode = TimeMode.SIMULATED
         self.client_sim_data: List[BaseSim] = []
         self.selected_clients = []
+        self.failed_clients = []
         self.clients_training_metrics = {}
         self.cur_time = -1
         self.model_size = model_size
         self.train_num_dict = train_num_dict
+        self.round_timeout = 100
 
         if self.time_mode == TimeMode.SIMULATED:
             self.client_sim_data = load_sim_data(self.args)
@@ -35,6 +37,11 @@ class BaseSelector:
         if self.time_mode != TimeMode.SIMULATED:
             return True
         return self.client_sim_data[client_id].is_active(time)
+
+    def is_client_active_till_the_end(self, client_id, time):
+        if self.time_mode != TimeMode.SIMULATED:
+            return True
+        return self.client_sim_data[client_id].active_till_the_end(time, self.model_size)
 
     def get_client_completion_time(self, client_id):
         if self.time_mode == TimeMode.NONE:
@@ -46,13 +53,25 @@ class BaseSelector:
         if self.cur_time == -1:
             self.cur_time = 0
         else:
-            self.cur_time += np.max(self.client_times[self.selected_clients])
+            if len(self.selected_clients) == 0 or len(self.failed_clients) > 0:
+                self.cur_time += self.round_timeout
+            else:
+                self.cur_time += np.max(self.client_times[self.selected_clients])
         candidates = [i for i in range(client_num_in_total) if self.is_client_active(i, self.cur_time)]
         self.selected_clients = self.sample(round_idx, candidates, client_num_per_round)
+
+        new_clients = list(filter(lambda client: self.is_client_active_till_the_end(client, self.cur_time) and
+                                                 self.get_client_completion_time(client) <= self.round_timeout,
+                                  self.selected_clients))
+        self.failed_clients = list(set(self.selected_clients).difference(new_clients))
+        self.selected_clients = new_clients
+
         logging.info('Current time is: {}'.format(self.cur_time))
         logging.info('Sampled clients for round {}: {}'.format(round_idx, self.selected_clients))
+        logging.info('Round {} failed clients: {}'.format(round_idx, self.failed_clients))
+
         return self.selected_clients
 
     # noinspection PyMethodMayBeStatic
     def sample(self, round_idx, candidates, client_num_per_round):
-        pass
+        return []

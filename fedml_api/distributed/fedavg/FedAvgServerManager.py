@@ -33,13 +33,26 @@ class FedAVGServerManager(ServerManager):
 
     def send_init_msg(self):
         # sampling clients
-        client_indexes = self.aggregator.client_sampling(self.round_idx, self.args.client_num_in_total,
-                                                         self.args.client_num_per_round)
+        client_indexes = self.sample_clients()
         global_model_params = self.aggregator.get_global_model_params()
         if self.args.is_mobile == 1:
             global_model_params = transform_tensor_to_list(global_model_params)
         for process_id in range(1, len(client_indexes) + 1):
             self.send_message_init_config(process_id, global_model_params, client_indexes[process_id - 1])
+
+    def sample_clients(self):
+        # sampling clients
+        while True:
+            client_indexes = self.aggregator.client_sampling(self.round_idx, self.args.client_num_in_total,
+                                                             self.args.client_num_per_round)
+            if len(client_indexes) > 0:
+                break
+            self.round_idx += 1
+            if self.round_idx in self.args.checkpoints:
+                self.save_model()
+            if self.round_idx == self.round_num:
+                self.finish()
+        return client_indexes
 
     def register_message_receive_handlers(self):
         self.register_message_receive_handler(MyMessage.MSG_TYPE_C2S_SEND_MODEL_TO_SERVER,
@@ -73,10 +86,7 @@ class FedAVGServerManager(ServerManager):
                 else:
                     client_indexes = self.preprocessed_client_lists[self.round_idx]
             else:
-                # sampling clients
-                client_indexes = self.aggregator.client_sampling(self.round_idx, self.args.client_num_in_total,
-                                                                 self.args.client_num_per_round)
-
+                client_indexes = self.sample_clients()
             if self.args.is_mobile == 1:
                 global_model_params = transform_tensor_to_list(global_model_params)
 

@@ -18,6 +18,10 @@ import random
 import socket
 import sys
 
+# for compute canada gpu allocation issue
+os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+
+
 import numpy as np
 import psutil
 import setproctitle

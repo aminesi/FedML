@@ -60,11 +60,12 @@ class BaseSelector:
         candidates = [i for i in range(client_num_in_total) if self.is_client_active(i, self.cur_time)]
         self.selected_clients = self.sample(round_idx, candidates, client_num_per_round)
 
-        new_clients = list(filter(lambda client: self.is_client_active_till_the_end(client, self.cur_time) and
-                                                 self.get_client_completion_time(client) <= self.round_timeout,
-                                  self.selected_clients))
-        self.failed_clients = list(set(self.selected_clients).difference(new_clients))
-        self.selected_clients = new_clients
+        if self.args.allow_failed_clients == 'no':
+            new_clients = list(filter(lambda client: self.is_client_active_till_the_end(client, self.cur_time) and
+                                                     self.get_client_completion_time(client) <= self.round_timeout,
+                                      self.selected_clients))
+            self.failed_clients = list(set(self.selected_clients).difference(new_clients))
+            self.selected_clients = new_clients
 
         logging.info('Current time is: {}'.format(self.cur_time))
         logging.info('Sampled clients for round {}: {}'.format(round_idx, self.selected_clients))

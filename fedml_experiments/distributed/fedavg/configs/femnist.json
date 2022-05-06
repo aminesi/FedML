@@ -10,5 +10,6 @@
   "client_optimizer": "sgd",
   "batch_size": 20,
   "lr": 0.1,
-  "checkpoints": "1500 2000"
+  "checkpoints": "1500 2000",
+  "allow_failed_clients": "yes"
 }

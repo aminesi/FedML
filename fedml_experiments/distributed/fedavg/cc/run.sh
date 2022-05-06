@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --time=14:00:00
+#SBATCH --time=10:00:00
 #SBATCH --output=%x-%j.out
 #SBATCH --ntasks=11
 #SBATCH --cpus-per-task=4

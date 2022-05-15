@@ -33,7 +33,7 @@ def add_args(parser):
     )
 
     parser.add_argument(
-        "--client_num_in_total", type=int, default=107749, metavar="NN",
+        "--client_num_in_total", type=int, default=3400, metavar="NN",
         help="number of workers in a distributed cluster"
     )
 
@@ -136,17 +136,17 @@ for data in sim_data:
     })
 
 df = pd.DataFrame(data_analysis)
-df['active_percent'] = df['active_durations'].apply(sum) / df['total_time']
-max_time = df['comp_time'].max()
-df['mean_active'] = df['active_durations'].apply(lambda durations: np.array(durations).mean())
-
-df = df[['active_percent', 'mean_active', 'status_change']]
-df_n = (df - df.min()) / (df.max() - df.min())
-df_n['status_change'] = 1 - df_n['status_change']
-df_n['total_score'] = df_n.mean(axis=1)
-
-worst_to_best = df_n['total_score'].to_numpy().argsort()
-np.save('avail_worst_to_best.npy', worst_to_best)
+# df['active_percent'] = df['active_durations'].apply(sum) / df['total_time']
+# max_time = df['comp_time'].max()
+# df['mean_active'] = df['active_durations'].apply(lambda durations: np.array(durations).mean())
+#
+# df = df[['active_percent', 'mean_active', 'status_change']]
+# df_n = (df - df.min()) / (df.max() - df.min())
+# df_n['status_change'] = 1 - df_n['status_change']
+# df_n['total_score'] = df_n.mean(axis=1)
+#
+# worst_to_best = df_n['total_score'].to_numpy().argsort()
+# np.save('avail_worst_to_best.npy', worst_to_best)
 
 # for c in df.columns:
 #     plt.figure()

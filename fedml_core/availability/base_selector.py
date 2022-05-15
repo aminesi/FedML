@@ -29,6 +29,7 @@ class BaseSelector:
         self.model_size = model_size
         self.train_num_dict = train_num_dict
         self.round_timeout = self.args.round_timeout
+        self.times = []
 
         if self.time_mode == TimeMode.SIMULATED:
             self.client_sim_data = load_sim_data(self.args)
@@ -57,6 +58,7 @@ class BaseSelector:
                 self.cur_time += self.round_timeout
             else:
                 self.cur_time += np.max(self.client_times[self.selected_clients])
+            self.times.append(self.cur_time)
         candidates = [i for i in range(client_num_in_total) if self.is_client_active(i, self.cur_time)]
         self.selected_clients = self.sample(round_idx, candidates, client_num_per_round)
 
@@ -76,3 +78,12 @@ class BaseSelector:
     # noinspection PyMethodMayBeStatic
     def sample(self, round_idx, candidates, client_num_per_round):
         return []
+
+    def finish(self):
+        if len(self.selected_clients) == 0 or len(self.failed_clients) > 0:
+            self.cur_time += self.round_timeout
+        else:
+            self.cur_time += np.max(self.client_times[self.selected_clients])
+        self.times.append(self.cur_time)
+        np.save(self.args.output_dir + 'times.npy', np.array(self.times))
+

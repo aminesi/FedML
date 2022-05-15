@@ -5,8 +5,10 @@ import random
 import sys
 import time
 
+import numpy as np
 import torch
 import wandb
+import numpy
 
 from fedml_core.availability.aggregator import BaseAggregator
 from fedml_core.availability.base_selector import TimeMode
@@ -31,6 +33,7 @@ class FedAVGAggregator(BaseAggregator):
         self.train_data_local_dict = train_data_local_dict
         self.test_data_local_dict = test_data_local_dict
         self.train_data_local_num_dict = train_data_local_num_dict
+        self.accuracies = []
 
         self.device = device
         params = self.get_global_model_params()
@@ -155,8 +158,14 @@ class FedAVGAggregator(BaseAggregator):
 
             # test on test dataset
             test_acc = sum(test_tot_corrects) / sum(test_num_samples)
+            self.accuracies.append(test_acc)
             test_loss = sum(test_losses) / sum(test_num_samples)
             wandb.log({"Test/Acc": test_acc, "round": round_idx})
             wandb.log({"Test/Loss": test_loss, "round": round_idx})
             stats = {'test_acc': test_acc, 'test_loss': test_loss}
             logging.info(stats)
+
+    def finish(self):
+        np.save(self.args.output_dir + 'accuracies.npy', np.array(self.accuracies))
+        self.client_selector.finish()
+

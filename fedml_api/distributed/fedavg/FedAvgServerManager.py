@@ -47,6 +47,7 @@ class FedAVGServerManager(ServerManager):
                                                              self.args.client_num_per_round)
             if len(client_indexes) > 0:
                 break
+            self.aggregator.test_on_server_for_all_clients(self.round_idx)
             self.round_idx += 1
             if self.round_idx in self.args.checkpoints:
                 self.save_model()
@@ -117,3 +118,8 @@ class FedAVGServerManager(ServerManager):
 
         with open(path + 'args.txt', 'w') as f:
             f.write(args)
+
+    def finish(self):
+        self.aggregator.finish()
+        super().finish()
+

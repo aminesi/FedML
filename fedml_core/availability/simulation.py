@@ -65,10 +65,10 @@ def load_sim_data(aggregator_args):
         capacity_data = pickle.load(cp)
 
     client_sim_data = []
-    for client_id in range(1, aggregator_args.client_num_in_total + 1):
+    for client_id in range(aggregator_args.client_num_in_total):
         client_sim = ClientSim(
-            trace_data[client_id % len(trace_data)],
-            capacity_data[client_id % len(capacity_data)],
+            trace_data[(client_id % len(trace_data)) + 1],
+            capacity_data[(client_id % len(capacity_data)) + 1],
             aggregator_args
         )
         client_sim_data.append(client_sim)

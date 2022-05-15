@@ -28,7 +28,7 @@ class BaseSelector:
         self.cur_time = -1
         self.model_size = model_size
         self.train_num_dict = train_num_dict
-        self.round_timeout = 100
+        self.round_timeout = self.args.round_timeout
 
         if self.time_mode == TimeMode.SIMULATED:
             self.client_sim_data = load_sim_data(self.args)

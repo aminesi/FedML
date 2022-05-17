@@ -8,7 +8,7 @@
 #SBATCH --mem-per-cpu=4G
 #SBATCH --gpu-bind=single:1
 
-cd ~/scratch/FedML
+cd ~/FedML
 
 
 source venv/bin/activate

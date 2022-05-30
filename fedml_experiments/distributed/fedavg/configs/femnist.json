@@ -13,5 +13,6 @@
   "checkpoints": "1500 2000",
   "allow_failed_clients": "no",
   "time_mode": "simulated",
-  "trace_distro": "high_avail"
+  "trace_distro": "average",
+  "selector": "mda"
 }

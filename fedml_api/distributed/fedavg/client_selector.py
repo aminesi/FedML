@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 
 import numpy as np
 
@@ -32,6 +33,70 @@ class FedCs(BaseSelector):
             if time < self.round_limit:
                 client_indexes.append(indexes[i])
         return client_indexes
+
+
+class MdaSelector(BaseSelector):
+
+    # factors:
+    # 1. failure history
+    # 2. expected continues availability
+
+    def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
+        super().__init__(aggregator_args, model_size, train_num_dict)
+        self.failure_history = defaultdict(list)
+        self.availability_history = [[] for _ in range(self.args.client_num_in_total)]
+        self.init_round_time = []
+
+    def sample(self, round_idx, candidates, client_num_per_round):
+        self.init_round_time.append(self.cur_time)
+        available = set(candidates)
+
+        for i in range(self.args.client_num_in_total):
+            self.availability_history[i].append(i in available)
+
+        if round_idx > 0:
+            for client in self.failed_clients:
+                self.failure_history[client].append(round_idx - 1)
+
+        ws = self.calculate_weights(candidates, round_idx)
+        np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
+        num_clients = min(client_num_per_round, len(candidates))
+        client_indexes = np.random.choice(candidates, num_clients, replace=False, p=ws)
+        return client_indexes
+
+    def calculate_weights(self, candidates, round_idx):
+        max_pen = 1
+        if round_idx > 0:
+            max_pen = sum(1 / i for i in range(1, round_idx + 1))
+        weights = []
+        for client in candidates:
+            init_weight = .5
+            failure_history = np.array(self.failure_history[client])
+            availability_history = list(zip(self.init_round_time, self.availability_history[client]))
+            if len(availability_history) > 10:
+                availability_history = availability_history[-10:]
+                last_time, last_available = 0, False
+                total_active = 0
+                start_time = -1
+                for time, is_available in availability_history:
+                    if start_time == -1:
+                        start_time = time
+                    if is_available and last_available:
+                        total_active += (time - last_time)
+                    last_available = is_available
+                    last_time = time
+
+                active_percentage = total_active / (self.cur_time - start_time)
+                init_weight += (active_percentage - 0.5) * 2 * init_weight
+
+            if len(failure_history) > 0:
+                penalty = (1 / (round_idx - failure_history)).sum()
+                init_weight *= (1 - penalty / max_pen)
+            weights.append(init_weight)
+
+        weights = np.array(weights)
+        weights = weights / np.sum(weights)
+        return weights
 
 
 class Oort(BaseSelector):

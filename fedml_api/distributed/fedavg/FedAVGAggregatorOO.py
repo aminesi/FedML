@@ -12,7 +12,7 @@ import numpy
 
 from fedml_core.availability.aggregator import BaseAggregator
 from fedml_core.availability.base_selector import TimeMode
-from .client_selector import RandomSelector, FedCs, Oort
+from .client_selector import RandomSelector, FedCs, Oort, MdaSelector
 from .utils import transform_list_to_tensor, transform_tensor_to_list
 
 import pydevd_pycharm
@@ -42,6 +42,8 @@ class FedAVGAggregator(BaseAggregator):
         model_size = sys.getsizeof(pickle.dumps(params)) / 1024.0 * 8
         if args.selector == 'random':
             client_selector = RandomSelector(args, model_size, train_data_local_num_dict)
+        elif args.selector == 'mda':
+            client_selector = MdaSelector(args, model_size, train_data_local_num_dict)
         elif args.selector == 'fedcs':
             client_selector = FedCs(args, model_size, train_data_local_num_dict)
         elif args.selector == 'oort':

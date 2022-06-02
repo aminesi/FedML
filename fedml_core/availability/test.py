@@ -27,13 +27,14 @@ def add_args(parser):
         metavar="N",
         help="how to partition the dataset on local workers",
     )
-
+    parser.add_argument('--trace_distro', type=str,
+                        default='random')
     parser.add_argument(
         "--partition_alpha", type=float, default=0.5, metavar="PA", help="partition alpha (default: 0.5)"
     )
 
     parser.add_argument(
-        "--client_num_in_total", type=int, default=3400, metavar="NN",
+        "--client_num_in_total", type=int, default=107749, metavar="NN",
         help="number of workers in a distributed cluster"
     )
 
@@ -136,6 +137,7 @@ for data in sim_data:
     })
 
 df = pd.DataFrame(data_analysis)
+pd
 # df['active_percent'] = df['active_durations'].apply(sum) / df['total_time']
 # max_time = df['comp_time'].max()
 # df['mean_active'] = df['active_durations'].apply(lambda durations: np.array(durations).mean())

@@ -21,15 +21,17 @@ class FedCs(BaseSelector):
 
     def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
         super().__init__(aggregator_args, model_size, train_num_dict)
-        self.round_limit = 6
+        self.round_limit = 65
 
     def sample(self, round_idx, candidates, client_num_per_round):
         np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
-        num_clients = min(client_num_per_round, len(candidates))
+        num_clients = min(client_num_per_round * 10, len(candidates))
         indexes = np.random.choice(candidates, num_clients, replace=False)
         times = map(self.get_client_completion_time, indexes)
         client_indexes = []
         for i, time in enumerate(times):
+            if len(client_indexes) >= client_num_per_round:
+                break
             if time < self.round_limit:
                 client_indexes.append(indexes[i])
         return client_indexes

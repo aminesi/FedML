@@ -66,7 +66,7 @@ def add_args(parser):
     """
     parser.add_argument('--output_dir', type=str, default='./')
     parser.add_argument('--time_mode', type=str, default='none')  # "none" or "simulated"
-    parser.add_argument('--selector', type=str, default='random')  # "random" or "fedcs" or "oort"
+    parser.add_argument('--selector', type=str, default='random')  # "random" or "fedcs" or "oort" or "mda"
     parser.add_argument('--checkpoints', nargs='+', type=int, default=[])
     parser.add_argument('--allow_failed_clients', type=str, default='no')  # 'yes' or 'no'
     parser.add_argument('--trace_distro', type=str,

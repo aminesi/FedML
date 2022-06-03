@@ -72,6 +72,7 @@ def add_args(parser):
     parser.add_argument('--trace_distro', type=str,
                         default='random')  # "random" or "high_avail" or "low_avail" or "average"
     parser.add_argument('--round_timeout', type=int, default=180)
+    parser.add_argument('--score_method', type=str, default='mul')  # "add" or "mul"
     # Oort params
 
     parser.add_argument('--pacer_delta', type=float, default=5)

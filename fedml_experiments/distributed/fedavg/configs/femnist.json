@@ -14,5 +14,6 @@
   "allow_failed_clients": "no",
   "time_mode": "simulated",
   "trace_distro": "average",
-  "selector": "fedcs"
+  "selector": "mda",
+  "score_method": "mul"
 }

@@ -73,45 +73,32 @@ class MdaSelector(BaseSelector):
         weights = []
         for client in candidates:
             init_weight = .5
-            avail_weight = self.calc_avail_weight(client, init_weight, round_idx, max_pen)
-            hw_weight = self.calc_hw_weight(client, init_weight, round_idx)
-            weight = (avail_weight + hw_weight) / 2
-            if self.args.score_method == 'mul':
-                weight = np.sqrt(avail_weight * hw_weight)
-            weights.append(weight)
+            failure_history = np.array(self.failure_history[client])
+            availability_history = list(zip(self.init_round_time, self.availability_history[client]))
+            if len(availability_history) > 10:
+                availability_history = availability_history[-10:]
+                last_time, last_available = 0, False
+                total_active = 0
+                start_time = -1
+                for time, is_available in availability_history:
+                    if start_time == -1:
+                        start_time = time
+                    if is_available and last_available:
+                        total_active += (time - last_time)
+                    last_available = is_available
+                    last_time = time
+
+                active_percentage = total_active / (self.cur_time - start_time)
+                init_weight += (active_percentage - 0.5) * 2 * init_weight
+
+            if len(failure_history) > 0:
+                penalty = (1 / (round_idx - failure_history)).sum()
+                init_weight *= (1 - penalty / max_pen)
+            weights.append(init_weight)
 
         weights = np.array(weights)
         weights = weights / np.sum(weights)
         return weights
-
-    def calc_avail_weight(self, client, init_weight, round_idx, max_pen):
-        failure_history = np.array(self.failure_history[client])
-        availability_history = list(zip(self.init_round_time, self.availability_history[client]))
-        if len(availability_history) > 10:
-            availability_history = availability_history[-10:]
-            last_time, last_available = 0, False
-            total_active = 0
-            start_time = -1
-            for time, is_available in availability_history:
-                if start_time == -1:
-                    start_time = time
-                if is_available and last_available:
-                    total_active += (time - last_time)
-                last_available = is_available
-                last_time = time
-
-            active_percentage = total_active / (self.cur_time - start_time)
-            init_weight += (active_percentage - 0.5) * 2 * init_weight
-
-        if len(failure_history) > 0:
-            penalty = (1 / (round_idx - failure_history)).sum()
-            init_weight *= (1 - penalty / max_pen)
-        return init_weight
-
-    def calc_hw_weight(self, client, init_weight, round_idx):
-        if self.client_times[client] == 0:
-            return init_weight
-        return 1 - self.client_times[client] / self.args.round_timeout
 
 
 class Oort(BaseSelector):

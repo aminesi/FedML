@@ -8,11 +8,11 @@ import time
 import numpy as np
 import torch
 import wandb
-import numpy
+import torch.utils.data as data
 
 from fedml_core.availability.aggregator import BaseAggregator
 from fedml_core.availability.base_selector import TimeMode
-from .client_selector import RandomSelector, FedCs, Oort, MdaSelector
+from .client_selector import RandomSelector, FedCs, Oort, MdaSelector, TiFL
 from .utils import transform_list_to_tensor, transform_tensor_to_list
 
 import pydevd_pycharm
@@ -48,6 +48,8 @@ class FedAVGAggregator(BaseAggregator):
             client_selector = FedCs(args, model_size, train_data_local_num_dict)
         elif args.selector == 'oort':
             client_selector = Oort(args, model_size, train_data_local_num_dict)
+        elif args.selector == 'tifl':
+            client_selector = TiFL(args, model_size, train_data_local_num_dict, self.test_for_selected_clients)
         else:
             raise AttributeError('Unknown clients selector. selector can be "random" or "fedcs" or "oort"')
 
@@ -100,6 +102,15 @@ class FedAVGAggregator(BaseAggregator):
             return sample_testset
         else:
             return self.test_global
+
+    def test_for_selected_clients(self, clients_list):
+        d = data.DataLoader(data.ConcatDataset(
+            list(self.test_data_local_dict[c].dataset for c in clients_list if
+                 self.test_data_local_dict[c] is not None)),
+            batch_size=self.args.batch_size, shuffle=True)
+
+        metrics = self.trainer.test(d, self.device, self.args)
+        return metrics['test_correct'] / metrics['test_total']
 
     def test_on_server_for_all_clients(self, round_idx):
         if isinstance(self.client_selector, Oort):
@@ -170,4 +181,3 @@ class FedAVGAggregator(BaseAggregator):
     def finish(self):
         np.save(self.args.output_dir + 'accuracies.npy', np.array(self.accuracies))
         self.client_selector.finish()
-

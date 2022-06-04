@@ -143,51 +143,69 @@ class Oort(BaseSelector):
 
 class TiFL(BaseSelector):
 
-    def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
+    def __init__(self, aggregator_args, model_size, train_num_dict, test_for_selected_clients) -> None:
         super().__init__(aggregator_args, model_size, train_num_dict)
         self.tier_count = 5
-        self.tiers = [[] for _ in range(self.tier_count)]
         self.selected_tier = 0
-        self.credits = [100] * self.tier_count
+        self.update_interval = int(self.args.comm_round * .02)
+        self.tiers = [[] for _ in range(self.tier_count)]
+        self.credits = self.create_credits()
         self.probabilities = [1 / self.tier_count] * self.tier_count
-        self.update_interval = 50
-        self.old_tiers_acc = None
-        self.tiers_acc = None
+        self.old_tiers_acc = []
+        self.tiers_acc = []
         self.assign_clients_to_tiers()
+        self.test_for_selected_clients = test_for_selected_clients
+
+    def create_credits(self):
+        step = 1.5
+        base = self.args.comm_round / sum(step ** i for i in range(self.tier_count))
+        credits = [int(np.round(base * (step ** i))) for i in range(self.tier_count - 1)]
+        credits.append(self.args.comm_round - sum(credits))
+        credits.reverse()
+        return credits
 
     def assign_clients_to_tiers(self):
         clients = [index for index in range(self.args.client_num_in_total)]
-        self.tiers = np.array_split(np.argsort(map(self.get_client_completion_time, clients)), self.tier_count)
+        self.tiers = np.array_split(np.argsort(list(map(self.get_client_completion_time, clients))), self.tier_count)
 
     def calc_tiers_accuracy(self):
-        # todo do get accuracy on test
-        accuracies = [0.0] * self.tier_count
-        self.old_tiers_acc = self.tiers_acc
-        self.tiers_acc = accuracies
+        self.tiers_acc = []
+        for t in self.tiers:
+            self.tiers_acc.append(self.test_for_selected_clients(t))
 
     def sample(self, round_idx, candidates, client_num_per_round):
-        self.calc_tiers_accuracy()
         if round_idx % self.update_interval == 0 and round_idx >= self.update_interval:
+            self.calc_tiers_accuracy()
             if self.tiers_acc[self.selected_tier] <= self.old_tiers_acc[self.selected_tier]:
                 self.update_probabilities()
+            self.old_tiers_acc = self.tiers_acc
 
-        self.selected_tier = -1
-        while self.selected_tier != -1:
-            selected_tier = np.random.choice(range(self.tier_count), 1, replace=False, p=self.probabilities)[0]
-            if self.credits[selected_tier] > 0:
-                self.credits[selected_tier] -= 1
-                self.selected_tier = selected_tier
+        self.selected_tier = np.random.choice(range(len(self.tiers)), 1, replace=False, p=self.probabilities)[0]
+        self.credits[self.selected_tier] -= 1
 
         candidates = list(set(candidates).intersection(self.tiers[self.selected_tier]))
         num_clients = min(client_num_per_round, len(candidates))
         client_indexes = np.random.choice(candidates, num_clients, replace=False)
+
+        if self.credits[self.selected_tier] == 0:
+            self.tiers.pop(self.selected_tier)
+            self.credits.pop(self.selected_tier)
+            self.probabilities.pop(self.selected_tier)
+            if self.old_tiers_acc:
+                self.old_tiers_acc.pop(self.selected_tier)
+            if self.tiers_acc:
+                self.tiers_acc.pop(self.selected_tier)
+            self.update_probabilities()
+            self.selected_tier = 0
         return client_indexes
 
     def update_probabilities(self):
-        # todo the approach in paper is not correct
-        # n = np.sum(np.array(self.credits) > 0)
-        # d = n * (n - 1) / 2
-        # a = np.argsort(self.tiers_acc)
-        # for i, tier in enumerate(a):
-        #     self.probabilities[tier] = (n-i)/d
-        pass
+        n = len(self.tiers)
+        d = n * (n - 1) / 2
+        if self.tiers_acc:
+            a = np.argsort(self.tiers_acc)
+            for i, tier in enumerate(a):
+                self.probabilities[tier] = (n - i) / d
+            self.probabilities = list(np.array(self.probabilities) / sum(self.probabilities))
+        else:
+            self.probabilities = [1 / n] * n

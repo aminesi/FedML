@@ -5,13 +5,13 @@
   "data_dir": "./../../../data/FederatedEMNIST",
   "partition_method": "hetero",
   "client_num_per_round": 1,
-  "comm_round": 20,
+  "comm_round": 2000,
   "epochs": 1,
   "client_optimizer": "sgd",
   "batch_size": 20,
   "lr": 0.1,
   "checkpoints": "2 3",
   "time_mode": "simulated",
-  "selector": "mda",
+  "selector": "tifl",
   "score_method": "mul"
 }

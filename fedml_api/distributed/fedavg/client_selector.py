@@ -176,7 +176,7 @@ class TiFL(BaseSelector):
     def sample(self, round_idx, candidates, client_num_per_round):
         if round_idx % self.update_interval == 0 and round_idx >= self.update_interval:
             self.calc_tiers_accuracy()
-            if self.tiers_acc[self.selected_tier] <= self.old_tiers_acc[self.selected_tier]:
+            if self.old_tiers_acc and self.tiers_acc[self.selected_tier] <= self.old_tiers_acc[self.selected_tier]:
                 self.update_probabilities()
             self.old_tiers_acc = self.tiers_acc
 

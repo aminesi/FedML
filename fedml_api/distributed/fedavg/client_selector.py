@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from copy import deepcopy
 
 import numpy as np
 
@@ -157,37 +158,51 @@ class TiFL(BaseSelector):
         self.test_for_selected_clients = test_for_selected_clients
 
     def create_credits(self):
+        logging.debug('START: create credits')
         step = 1.5
         base = self.args.comm_round / sum(step ** i for i in range(self.tier_count))
         credits = [int(np.round(base * (step ** i))) for i in range(self.tier_count - 1)]
         credits.append(self.args.comm_round - sum(credits))
         credits.reverse()
+        logging.debug('END: create credits')
         return credits
 
     def assign_clients_to_tiers(self):
+        logging.debug('START: assign clients')
         clients = [index for index in range(self.args.client_num_in_total)]
         self.tiers = np.array_split(np.argsort(list(map(self.get_client_completion_time, clients))), self.tier_count)
+        logging.debug('END: assign clients')
 
     def calc_tiers_accuracy(self):
+        logging.debug('START: calc accuracies')
         self.tiers_acc = []
         for t in self.tiers:
             self.tiers_acc.append(self.test_for_selected_clients(t))
+        logging.debug('END: calc accuracies')
 
     def sample(self, round_idx, candidates, client_num_per_round):
         if round_idx % self.update_interval == 0 and round_idx >= self.update_interval:
             self.calc_tiers_accuracy()
             if self.old_tiers_acc and self.tiers_acc[self.selected_tier] <= self.old_tiers_acc[self.selected_tier]:
                 self.update_probabilities()
-            self.old_tiers_acc = self.tiers_acc
+            self.old_tiers_acc = deepcopy(self.tiers_acc)
 
+        logging.debug('START: select tier')
         self.selected_tier = np.random.choice(range(len(self.tiers)), 1, replace=False, p=self.probabilities)[0]
+        logging.info('TiFL selected tier for round {} = {}'.format(round_idx, self.selected_tier))
         self.credits[self.selected_tier] -= 1
+        logging.debug('END: select tier')
 
+        logging.debug('START: select clients')
         candidates = list(set(candidates).intersection(self.tiers[self.selected_tier]))
         num_clients = min(client_num_per_round, len(candidates))
         client_indexes = np.random.choice(candidates, num_clients, replace=False)
+        logging.debug('END: select clients')
 
         if self.credits[self.selected_tier] == 0:
+            logging.info('TiFL tier {} of {} is out of credits.'.format(self.selected_tier, len(self.tiers)))
+
+            logging.debug('START: removing tier')
             self.tiers.pop(self.selected_tier)
             self.credits.pop(self.selected_tier)
             self.probabilities.pop(self.selected_tier)
@@ -195,11 +210,13 @@ class TiFL(BaseSelector):
                 self.old_tiers_acc.pop(self.selected_tier)
             if self.tiers_acc:
                 self.tiers_acc.pop(self.selected_tier)
+            logging.debug('END: removing tier')
             self.update_probabilities()
             self.selected_tier = 0
         return client_indexes
 
     def update_probabilities(self):
+        logging.debug('START: update probs')
         n = len(self.tiers)
         d = n * (n - 1) / 2
         if self.tiers_acc:
@@ -209,3 +226,4 @@ class TiFL(BaseSelector):
             self.probabilities = list(np.array(self.probabilities) / sum(self.probabilities))
         else:
             self.probabilities = [1 / n] * n
+        logging.debug('END: update probs')

@@ -145,6 +145,8 @@ class Oort(BaseSelector):
 class TiFL(BaseSelector):
 
     def __init__(self, aggregator_args, model_size, train_num_dict, test_for_selected_clients) -> None:
+        logging.getLogger().setLevel(logging.DEBUG)
+
         super().__init__(aggregator_args, model_size, train_num_dict)
         self.tier_count = 5
         self.selected_tier = 0

@@ -220,8 +220,13 @@ class TiFL(BaseSelector):
     def update_probabilities(self):
         logging.debug('START: update probs')
         n = len(self.tiers)
+        if n == 0:
+            return
         d = n * (n - 1) / 2
         if self.tiers_acc:
+            if d == 0:
+                self.probabilities = [1]
+                return
             a = np.argsort(self.tiers_acc)
             for i, tier in enumerate(a):
                 self.probabilities[tier] = (n - i) / d

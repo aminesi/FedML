@@ -48,7 +48,7 @@ class FedAVGAggregator(BaseAggregator):
             client_selector = FedCs(args, model_size, train_data_local_num_dict)
         elif args.selector == 'oort':
             client_selector = Oort(args, model_size, train_data_local_num_dict)
-        elif args.selector == 'tifl':
+        elif args.selector == 'tifl' or args.selector == 'tiflx':
             client_selector = TiFL(args, model_size, train_data_local_num_dict, self.test_for_selected_clients)
         else:
             raise AttributeError('Unknown clients selector. selector can be "random" or "fedcs" or "oort"')

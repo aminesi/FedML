@@ -50,7 +50,7 @@ class MdaSelector(BaseSelector):
         self.availability_history = [[] for _ in range(self.args.client_num_in_total)]
         self.init_round_time = []
 
-    def sample(self, round_idx, candidates, client_num_per_round):
+    def update_history(self, round_idx, candidates):
         self.init_round_time.append(self.cur_time)
         available = set(candidates)
 
@@ -61,6 +61,8 @@ class MdaSelector(BaseSelector):
             for client in self.failed_clients:
                 self.failure_history[client].append(round_idx - 1)
 
+    def sample(self, round_idx, candidates, client_num_per_round):
+        self.update_history(round_idx, candidates)
         ws = self.calculate_weights(candidates, round_idx)
         np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
         num_clients = min(client_num_per_round, len(candidates))
@@ -76,7 +78,9 @@ class MdaSelector(BaseSelector):
             init_weight = .5
             avail_weight = self.calc_avail_weight(client, init_weight, round_idx, max_pen)
             hw_weight = self.calc_hw_weight(client, init_weight, round_idx)
-            weight = (avail_weight + hw_weight) / 2
+            weight = avail_weight
+            if self.args.score_method == 'add':
+                weight = (avail_weight + hw_weight) / 2
             if self.args.score_method == 'mul':
                 weight = np.sqrt(avail_weight * hw_weight)
             weights.append(weight)
@@ -115,34 +119,7 @@ class MdaSelector(BaseSelector):
         return 1 - self.client_times[client] / self.args.round_timeout
 
 
-class Oort(BaseSelector):
-
-    def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
-        super().__init__(aggregator_args, model_size, train_num_dict)
-        self.helper = OortHelper(self.args)
-        for client_id in range(self.args.client_num_in_total):
-            feedbacks = {'reward': min(self.train_num_dict[client_id], self.args.epochs * self.args.batch_size),
-                         'duration': self.get_client_completion_time(client_id)}
-            self.helper.register_client(client_id, feedbacks)
-
-    def sample(self, round_idx, candidates, client_num_per_round):
-        if round_idx != 0:
-            self.update_oort_helper(round_idx)
-        num_clients = min(client_num_per_round, len(candidates))
-        client_indexes = self.helper.select_participant(num_clients, candidates)
-        return client_indexes
-
-    def update_oort_helper(self, round_idx):
-        for client in self.selected_clients:
-            self.helper.update_client_util(client, {
-                'reward': self.clients_training_metrics[client]['oort_score'],
-                'duration': self.client_times[client],
-                'status': True,
-                'time_stamp': round_idx
-            })
-
-
-class TiFL(BaseSelector):
+class TiFL(MdaSelector):
 
     def __init__(self, aggregator_args, model_size, train_num_dict, test_for_selected_clients) -> None:
         logging.getLogger().setLevel(logging.DEBUG)
@@ -158,6 +135,7 @@ class TiFL(BaseSelector):
         self.tiers_acc = []
         self.assign_clients_to_tiers()
         self.test_for_selected_clients = test_for_selected_clients
+        self.extended = self.args.selector == 'tiflx'
 
     def create_credits(self):
         logging.debug('START: create credits')
@@ -183,6 +161,7 @@ class TiFL(BaseSelector):
         logging.debug('END: calc accuracies')
 
     def sample(self, round_idx, candidates, client_num_per_round):
+        self.update_history(round_idx, candidates)
         if round_idx % self.update_interval == 0 and round_idx >= self.update_interval:
             self.calc_tiers_accuracy()
             if self.old_tiers_acc and self.tiers_acc[self.selected_tier] <= self.old_tiers_acc[self.selected_tier]:
@@ -197,8 +176,11 @@ class TiFL(BaseSelector):
 
         logging.debug('START: select clients')
         candidates = list(set(candidates).intersection(self.tiers[self.selected_tier]))
+        ws = None
+        if self.extended:
+            ws = self.calculate_weights(candidates, round_idx)
         num_clients = min(client_num_per_round, len(candidates))
-        client_indexes = np.random.choice(candidates, num_clients, replace=False)
+        client_indexes = np.random.choice(candidates, num_clients, replace=False, p=ws)
         logging.debug('END: select clients')
 
         if self.credits[self.selected_tier] == 0:
@@ -234,3 +216,30 @@ class TiFL(BaseSelector):
         else:
             self.probabilities = [1 / n] * n
         logging.debug('END: update probs')
+
+
+class Oort(BaseSelector):
+
+    def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
+        super().__init__(aggregator_args, model_size, train_num_dict)
+        self.helper = OortHelper(self.args)
+        for client_id in range(self.args.client_num_in_total):
+            feedbacks = {'reward': min(self.train_num_dict[client_id], self.args.epochs * self.args.batch_size),
+                         'duration': self.get_client_completion_time(client_id)}
+            self.helper.register_client(client_id, feedbacks)
+
+    def sample(self, round_idx, candidates, client_num_per_round):
+        if round_idx != 0:
+            self.update_oort_helper(round_idx)
+        num_clients = min(client_num_per_round, len(candidates))
+        client_indexes = self.helper.select_participant(num_clients, candidates)
+        return client_indexes
+
+    def update_oort_helper(self, round_idx):
+        for client in self.selected_clients:
+            self.helper.update_client_util(client, {
+                'reward': self.clients_training_metrics[client]['oort_score'],
+                'duration': self.client_times[client],
+                'status': True,
+                'time_stamp': round_idx
+            })

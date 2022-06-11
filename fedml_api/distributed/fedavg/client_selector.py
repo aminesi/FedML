@@ -79,10 +79,11 @@ class MdaSelector(BaseSelector):
             avail_weight = self.calc_avail_weight(client, init_weight, round_idx, max_pen)
             hw_weight = self.calc_hw_weight(client, init_weight, round_idx)
             weight = avail_weight
-            if self.args.score_method == 'add':
-                weight = (avail_weight + hw_weight) / 2
-            if self.args.score_method == 'mul':
-                weight = np.sqrt(avail_weight * hw_weight)
+            if self.args.mda_method == 'mix':
+                if self.args.score_method == 'add':
+                    weight = (avail_weight + hw_weight) / 2
+                if self.args.score_method == 'mul':
+                    weight = np.sqrt(avail_weight * hw_weight)
             weights.append(weight)
 
         weights = np.array(weights)
@@ -110,7 +111,10 @@ class MdaSelector(BaseSelector):
 
         if len(failure_history) > 0:
             penalty = (1 / (round_idx - failure_history)).sum()
-            init_weight *= (1 - penalty / max_pen)
+            if self.args.score_method == 'add':
+                init_weight = ((1 - penalty / max_pen) + init_weight) / 2
+            else:
+                init_weight *= (1 - penalty / max_pen)
         return init_weight
 
     def calc_hw_weight(self, client, init_weight, round_idx):

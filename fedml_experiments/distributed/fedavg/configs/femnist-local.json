@@ -13,5 +13,6 @@
   "checkpoints": "2 3",
   "time_mode": "simulated",
   "selector": "tiflx",
-  "score_method": "avail"
+  "mda_method": "avail",
+  "score_method": "add"
 }

@@ -1,0 +1,22 @@
+{
+  "gpu_mapping_key": "femnist",
+  "model": "cnn",
+  "dataset": "cifar10",
+  "data_dir": "./../../../data/cifar10",
+  "partition_method": "hetero",
+  "partition_alpha": 0.5,
+  "client_num_per_round": 1,
+  "client_num_in_total": 100,
+  "comm_round": 1000,
+  "epochs": 5,
+  "client_optimizer": "sgd",
+  "batch_size": 20,
+  "lr": 0.01,
+  "checkpoints": "500 1000",
+  "allow_failed_clients": "yes",
+  "time_mode": "none",
+  "trace_distro": "average",
+  "selector": "random",
+  "mda_method": "avail",
+  "score_method": "add"
+}

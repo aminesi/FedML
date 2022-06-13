@@ -160,6 +160,53 @@ def partition_data(dataset, datadir, partition, n_nets, alpha):
     return X_train, y_train, X_test, y_test, net_dataidx_map, traindata_cls_counts
 
 
+def partition_data_test(dataset, datadir, partition, n_nets, alpha):
+    logging.info("*********partition data***************")
+    X_train, y_train, X_test, y_test = load_cifar10_data(datadir)
+    n_train = X_train.shape[0]
+    n_test = X_test.shape[0]
+
+    indexes = []
+    counts = []
+    for split, N in zip(['train', 'test'], [n_train, n_test]):
+        net_dataidx_map = None
+        if partition == "homo":
+            idxs = np.random.permutation(N)
+            batch_idxs = np.array_split(idxs, n_nets)
+            net_dataidx_map = {i: batch_idxs[i] for i in range(n_nets)}
+
+        elif partition == "hetero":
+
+            min_size = 0
+            K = 10
+            logging.info("N = " + str(N))
+            net_dataidx_map = {}
+            labels = y_train if split == 'train' else y_test
+            while min_size < 10:
+                idx_batch = [[] for _ in range(n_nets)]
+                # for each class in the dataset
+                for k in range(K):
+                    idx_k = np.where(labels == k)[0]
+                    np.random.shuffle(idx_k)
+                    proportions = np.random.dirichlet(np.repeat(alpha, n_nets))
+                    ## Balance
+                    proportions = np.array([p * (len(idx_j) < N / n_nets) for p, idx_j in zip(proportions, idx_batch)])
+                    proportions = proportions / proportions.sum()
+                    proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
+                    idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
+                    min_size = min([len(idx_j) for idx_j in idx_batch])
+
+            for j in range(n_nets):
+                np.random.shuffle(idx_batch[j])
+                net_dataidx_map[j] = idx_batch[j]
+
+        data_cls_counts = record_net_data_stats(labels, net_dataidx_map)
+        indexes.append(net_dataidx_map)
+        counts.append(data_cls_counts)
+
+    return X_train, y_train, X_test, y_test, *indexes, *counts
+
+
 # for centralized training
 def get_dataloader(dataset, datadir, train_bs, test_bs, dataidxs=None):
     return get_dataloader_CIFAR10(datadir, train_bs, test_bs, dataidxs)
@@ -224,7 +271,7 @@ def load_partition_data_distributed_cifar10(process_id, dataset, data_dir, parti
         logging.info("rank = %d, local_sample_number = %d" % (process_id, local_data_num))
         # training batch size = 64; algorithms batch size = 32
         train_data_local, test_data_local = get_dataloader(dataset, data_dir, batch_size, batch_size,
-                                                 dataidxs)
+                                                           dataidxs)
         logging.info("process_id = %d, batch_num_train_local = %d, batch_num_test_local = %d" % (
             process_id, len(train_data_local), len(test_data_local)))
         train_data_global = None
@@ -233,19 +280,25 @@ def load_partition_data_distributed_cifar10(process_id, dataset, data_dir, parti
 
 
 def load_partition_data_cifar10(dataset, data_dir, partition_method, partition_alpha, client_number, batch_size):
-    X_train, y_train, X_test, y_test, net_dataidx_map, traindata_cls_counts = partition_data(dataset,
-                                                                                             data_dir,
-                                                                                             partition_method,
-                                                                                             client_number,
-                                                                                             partition_alpha)
+
+    X_train, y_train, X_test, y_test, \
+    train_net_dataidx_map, test_net_dataidx_map, train_data_cls_counts, test_data_cls_counts = partition_data_test(
+        dataset,
+        data_dir,
+        partition_method,
+        client_number,
+        partition_alpha)
+
     class_num = len(np.unique(y_train))
-    logging.info("traindata_cls_counts = " + str(traindata_cls_counts))
-    train_data_num = sum([len(net_dataidx_map[r]) for r in range(client_number)])
+    logging.info("train_data_cls_counts = " + str(train_data_cls_counts))
+    logging.info("test_data_cls_counts = " + str(test_data_cls_counts))
+    train_data_num = sum([len(train_net_dataidx_map[r]) for r in range(client_number)])
+    test_data_num = sum([len(test_net_dataidx_map[r]) for r in range(client_number)])
 
     train_data_global, test_data_global = get_dataloader(dataset, data_dir, batch_size, batch_size)
     logging.info("train_dl_global number = " + str(len(train_data_global)))
     logging.info("test_dl_global number = " + str(len(test_data_global)))
-    test_data_num = len(test_data_global)
+    # test_data_num = len(test_data_global)
 
     # get local dataset
     data_local_num_dict = dict()
@@ -253,14 +306,15 @@ def load_partition_data_cifar10(dataset, data_dir, partition_method, partition_a
     test_data_local_dict = dict()
 
     for client_idx in range(client_number):
-        dataidxs = net_dataidx_map[client_idx]
-        local_data_num = len(dataidxs)
+        train_dataidxs = train_net_dataidx_map[client_idx]
+        test_dataidxs = test_net_dataidx_map[client_idx]
+        local_data_num = len(train_dataidxs)
         data_local_num_dict[client_idx] = local_data_num
         logging.info("client_idx = %d, local_sample_number = %d" % (client_idx, local_data_num))
 
         # training batch size = 64; algorithms batch size = 32
-        train_data_local, test_data_local = get_dataloader(dataset, data_dir, batch_size, batch_size,
-                                                 dataidxs)
+        train_data_local, test_data_local = \
+            get_dataloader_test(dataset, data_dir, batch_size, batch_size, train_dataidxs, test_dataidxs)
         logging.info("client_idx = %d, batch_num_train_local = %d, batch_num_test_local = %d" % (
             client_idx, len(train_data_local), len(test_data_local)))
         train_data_local_dict[client_idx] = train_data_local

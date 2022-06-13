@@ -48,6 +48,7 @@ from fedml_api.data_preprocessing.cifar100.data_loader import load_partition_dat
 from fedml_api.data_preprocessing.cinic10.data_loader import load_partition_data_cinic10
 
 from fedml_api.model.cv.cnn import CNN_DropOut
+from fedml_api.model.cv.cifar import CifarCNN
 from fedml_api.model.cv.resnet_gn import resnet18
 from fedml_api.model.cv.mobilenet import mobilenet
 from fedml_api.model.cv.resnet import resnet56
@@ -405,6 +406,9 @@ def create_model(args, model_name, output_dim):
     elif model_name == "cnn" and args.dataset == "femnist":
         logging.info("CNN + FederatedEMNIST")
         model = CNN_DropOut(False)
+    elif model_name == "cnn" and args.dataset == "cifar10":
+        logging.info("CNN + CIFAR10")
+        model = CifarCNN()
     elif model_name == "resnet18_gn" and args.dataset == "fed_cifar100":
         logging.info("ResNet18_GN + Federated_CIFAR100")
         model = resnet18()

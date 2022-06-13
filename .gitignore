@@ -59,4 +59,5 @@ data/fednlp/*
 *.jpg
 
 !fedml_experiments/distributed/fedavg/configs/*
+!fedml_experiments/distributed/fedavg/results/**/*
 !requirements*.txt

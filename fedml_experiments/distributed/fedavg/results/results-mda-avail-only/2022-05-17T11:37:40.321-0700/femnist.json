@@ -1,0 +1,17 @@
+{
+  "gpu_mapping_key": "femnist",
+  "model": "cnn",
+  "dataset": "femnist",
+  "data_dir": "./../../../data/FederatedEMNIST",
+  "partition_method": "hetero",
+  "client_num_per_round": 10,
+  "comm_round": 2000,
+  "epochs": 1,
+  "client_optimizer": "sgd",
+  "batch_size": 20,
+  "lr": 0.1,
+  "checkpoints": "1500 2000",
+  "allow_failed_clients": "no",
+  "time_mode": "simulated",
+  "trace_distro": "low_avail"
+}

@@ -81,14 +81,14 @@ def _data_transforms_cifar10():
     CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
 
     train_transform = transforms.Compose([
-        # transforms.ToPILImage(),
-        # transforms.RandomCrop(32, padding=4),
-        # transforms.RandomHorizontalFlip(),
+        transforms.ToPILImage(),
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
     ])
 
-    # train_transform.transforms.append(Cutout(16))
+    train_transform.transforms.append(Cutout(16))
 
     valid_transform = transforms.Compose([
         transforms.ToTensor(),

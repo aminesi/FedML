@@ -26,7 +26,7 @@ class FedCs(BaseSelector):
 
     def sample(self, round_idx, candidates, client_num_per_round):
         np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
-        num_clients = min(client_num_per_round * 10, len(candidates))
+        num_clients = min(client_num_per_round * 2, len(candidates))
         indexes = np.random.choice(candidates, num_clients, replace=False)
         times = map(self.get_client_completion_time, indexes)
         client_indexes = []

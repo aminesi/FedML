@@ -409,6 +409,9 @@ def create_model(args, model_name, output_dim):
     elif model_name == "cnn" and args.dataset == "cifar10":
         logging.info("CNN + CIFAR10")
         model = CifarCNN()
+    elif model_name == "resnet18_gn" and args.dataset == "cifar10":
+        logging.info("ResNet18_GN + CIFAR10")
+        model = resnet18(num_classes=10)
     elif model_name == "resnet18_gn" and args.dataset == "fed_cifar100":
         logging.info("ResNet18_GN + Federated_CIFAR100")
         model = resnet18()

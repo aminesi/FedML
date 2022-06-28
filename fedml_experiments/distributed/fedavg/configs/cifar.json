@@ -4,7 +4,7 @@
   "dataset": "cifar10",
   "data_dir": "./../../../data/cifar10",
   "partition_method": "hetero",
-  "partition_alpha": 0.5,
+  "partition_alpha": 0.2,
   "client_num_per_round": 10,
   "client_num_in_total": 500,
   "comm_round": 4000,
@@ -16,7 +16,7 @@
   "allow_failed_clients": "no",
   "time_mode": "simulated",
   "trace_distro": "average",
-  "selector": "tifl",
+  "selector": "random",
   "mda_method": "avail",
   "score_method": "add"
 }

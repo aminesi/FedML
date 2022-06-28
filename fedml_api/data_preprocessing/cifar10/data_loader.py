@@ -182,7 +182,7 @@ def partition_data_test(dataset, datadir, partition, n_nets, alpha):
             logging.info("N = " + str(N))
             net_dataidx_map = {}
             labels = y_train if split == 'train' else y_test
-            t = 10 if split == 'train' else 5
+            t = 10 if split == 'train' else 1
             while min_size < t:
                 idx_batch = [[] for _ in range(n_nets)]
                 # for each class in the dataset

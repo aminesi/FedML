@@ -22,7 +22,7 @@ class FedCs(BaseSelector):
 
     def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
         super().__init__(aggregator_args, model_size, train_num_dict)
-        self.round_limit = 65
+        self.round_limit = 60
 
     def sample(self, round_idx, candidates, client_num_per_round):
         np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
@@ -173,7 +173,7 @@ class TiFL(MdaSelector):
             self.old_tiers_acc = deepcopy(self.tiers_acc)
 
         logging.debug('START: select tier')
-        self.selected_tier = np.random.choice(range(len(self.tiers)), 1, replace=False, p=self.probabilities)[0]
+        self.selected_tier = np.random.choice(range(len(self.tiers)), 1, replace=False)[0]
         logging.info('TiFL selected tier for round {} = {}'.format(round_idx, self.selected_tier))
         self.credits[self.selected_tier] -= 1
         logging.debug('END: select tier')

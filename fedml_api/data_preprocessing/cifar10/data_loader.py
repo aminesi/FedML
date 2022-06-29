@@ -240,8 +240,8 @@ def get_dataloader_test_CIFAR10(datadir, train_bs, test_bs, dataidxs_train=None,
     train_ds = dl_obj(datadir, dataidxs=dataidxs_train, train=True, transform=transform_train, download=True)
     test_ds = dl_obj(datadir, dataidxs=dataidxs_test, train=False, transform=transform_test, download=True)
 
-    train_dl = data.DataLoader(dataset=train_ds, batch_size=train_bs, shuffle=True, drop_last=True)
-    test_dl = data.DataLoader(dataset=test_ds, batch_size=test_bs, shuffle=False, drop_last=True)
+    train_dl = data.DataLoader(dataset=train_ds, batch_size=train_bs, shuffle=True)
+    test_dl = data.DataLoader(dataset=test_ds, batch_size=test_bs, shuffle=False)
 
     return train_dl, test_dl
 

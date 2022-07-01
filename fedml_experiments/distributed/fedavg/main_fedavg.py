@@ -48,7 +48,7 @@ from fedml_api.data_preprocessing.cifar100.data_loader import load_partition_dat
 from fedml_api.data_preprocessing.cinic10.data_loader import load_partition_data_cinic10
 
 from fedml_api.model.cv.cnn import CNN_DropOut
-from fedml_api.model.cv.cifar import CifarCNN
+from fedml_api.model.cv.cifar import CifarCNN, CNN
 from fedml_api.model.cv.resnet_gn import resnet18
 from fedml_api.model.cv.mobilenet import mobilenet
 from fedml_api.model.cv.resnet import resnet56
@@ -408,7 +408,7 @@ def create_model(args, model_name, output_dim):
         model = CNN_DropOut(False)
     elif model_name == "cnn" and args.dataset == "cifar10":
         logging.info("CNN + CIFAR10")
-        model = CifarCNN()
+        model = CNN()
     elif model_name == "resnet18_gn" and args.dataset == "cifar10":
         logging.info("ResNet18_GN + CIFAR10")
         model = resnet18(num_classes=10)
@@ -519,6 +519,62 @@ if __name__ == "__main__":
     # Note if the model is DNN (e.g., ResNet), the training will be very slow.
     # In this case, please use our FedML distributed version (./fedml_experiments/distributed_fedavg)
     model = create_model(args, model_name=args.model, output_dim=dataset[7])
+
+    # if process_id==0:
+    #     model.to(device)
+    #     model.train()
+    #
+    #     # train and update
+    #     criterion = torch.nn.CrossEntropyLoss().to(device)
+    #     if args.client_optimizer == "sgd":
+    #         optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), lr=0.01)
+    #     else:
+    #         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr,
+    #                                      weight_decay=args.wd, amsgrad=True)
+    #
+    #     epoch_loss = []
+    #     for epoch in range(30):
+    #         model.train()
+    #         # batch_loss = []
+    #         for batch_idx, (x, labels) in enumerate(train_data_global):
+    #             x, labels = x.to(device), labels.to(device)
+    #             model.zero_grad()
+    #             log_probs = model(x)
+    #             loss = criterion(log_probs, labels)
+    #             loss.backward()
+    #
+    #             # Uncommet this following line to avoid nan loss
+    #             # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 4.0)
+    #
+    #             optimizer.step()
+    #             # logging.info('Update Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+    #             #     epoch, (batch_idx + 1) * args.batch_size, len(train_data) * args.batch_size,
+    #             #            100. * (batch_idx + 1) / len(train_data), loss.item()))
+    #             # batch_loss.append(loss.item())
+    #
+    #         metrics = {
+    #             'test_correct': 0,
+    #             'test_loss': 0,
+    #             'test_total': 0
+    #         }
+    #         model.eval()
+    #
+    #         with torch.no_grad():
+    #             for batch_idx, (x, target) in enumerate(test_data_global):
+    #                 x = x.to(device)
+    #                 target = target.to(device)
+    #                 pred = model(x)
+    #                 loss = criterion(pred, target)
+    #                 _, predicted = torch.max(pred, -1)
+    #                 correct = predicted.eq(target).sum()
+    #
+    #                 metrics['test_correct'] += correct.item()
+    #                 metrics['test_loss'] += loss.item() * target.size(0)
+    #                 metrics['test_total'] += target.size(0)
+    #         logging.info(metrics['test_correct']/metrics['test_total'])
+    #
+    # else:
+    #     raise ValueError('dsds')
 
     args_str = []
     for arg in vars(args):

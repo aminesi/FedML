@@ -81,18 +81,15 @@ def _data_transforms_cifar10():
     CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
 
     train_transform = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    train_transform.transforms.append(Cutout(16))
+    # train_transform.transforms.append(Cutout(16))
 
     valid_transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
     return train_transform, valid_transform
@@ -281,7 +278,6 @@ def load_partition_data_distributed_cifar10(process_id, dataset, data_dir, parti
 
 
 def load_partition_data_cifar10(dataset, data_dir, partition_method, partition_alpha, client_number, batch_size):
-
     X_train, y_train, X_test, y_test, \
     train_net_dataidx_map, test_net_dataidx_map, train_data_cls_counts, test_data_cls_counts = partition_data_test(
         dataset,

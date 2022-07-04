@@ -5,7 +5,7 @@ from IPython.display import display
 import matplotlib.pyplot as plt
 import numpy as np
 
-from fedml_api.distributed.fedavg.client_selector import RandomSelector, FedCs, TiFL
+from fedml_api.distributed.fedavg.client_selector import RandomSelector, FedCs, TiFL, MdaSelector
 from fedml_core.availability.base_selector import BaseSelector
 from fedml_core.availability.simulation import load_sim_data
 
@@ -22,6 +22,7 @@ logging.basicConfig(
     format="%(asctime)s  %(levelname)s  (%(filename)s:%(lineno)d)  " + prefix + " -  %(message)s",
     datefmt="%H:%M:%S",
 )
+
 
 def add_args(parser):
     """
@@ -48,9 +49,9 @@ def add_args(parser):
     parser.add_argument('--allow_failed_clients', type=str, default='no')  # 'yes' or 'no'
     parser.add_argument('--trace_distro', type=str,
                         default='average')  # "random" or "high_avail" or "low_avail" or "average"
-    parser.add_argument('--round_timeout', type=int, default=180)
-    parser.add_argument('--fedcs_time', type=int, default=150)
-    parser.add_argument('--score_method', type=str, default='add')  # "add" or "mul"
+    parser.add_argument('--round_timeout', type=int, default=860)
+    parser.add_argument('--fedcs_time', type=int, default=300)
+    parser.add_argument('--score_method', type=str, default='mul')  # "add" or "mul"
     parser.add_argument('--mda_method', type=str, default='avail')  # "avail" or "mix"
     # Oort params
     parser.add_argument(
@@ -123,6 +124,21 @@ def add_args(parser):
 
 parser = argparse.ArgumentParser()
 args = add_args(parser)
+logging.getLogger().setLevel(logging.ERROR)
 
-selector = FedCs(args, 427386.5234375, 100)
-selector.simulate()
+for s in ['random', 'mda', 'fedcs', 'tifl', 'tiflx']:
+    args.selector = s
+    logging.error('\n\n{}'.format(s))
+
+    if s == 'random':
+        client_selector = RandomSelector(args, 427386.5234375, 0)
+    elif s == 'mda':
+        client_selector = MdaSelector(args, 427386.5234375, 0)
+    elif s == 'fedcs':
+        client_selector = FedCs(args, 427386.5234375, 0)
+    elif s == 'tifl' or s == 'tiflx':
+        client_selector = TiFL(args, 427386.5234375, 0, None)
+    else:
+        raise AttributeError('Unknown clients selector. selector can be "random" or "fedcs" or "oort"')
+
+    client_selector.simulate()

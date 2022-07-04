@@ -18,5 +18,7 @@
   "trace_distro": "average",
   "selector": "random",
   "mda_method": "avail",
-  "score_method": "add"
+  "score_method": "mul",
+  "round_timeout": 860,
+  "fedcs_time": 300
 }

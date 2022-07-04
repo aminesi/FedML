@@ -75,6 +75,7 @@ def add_args(parser):
     parser.add_argument('--round_timeout', type=int, default=180)
     parser.add_argument('--score_method', type=str, default='add')  # "add" or "mul"
     parser.add_argument('--mda_method', type=str, default='avail')  # "avail" or "mix"
+    parser.add_argument('--fedcs_time', type=int, default=160)
     # Oort params
 
     parser.add_argument('--pacer_delta', type=float, default=5)

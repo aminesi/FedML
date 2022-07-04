@@ -87,3 +87,18 @@ class BaseSelector:
         self.times.append(self.cur_time)
         np.save(self.args.output_dir + 'times.npy', np.array(self.times))
 
+    def simulate(self):
+        all = []
+        for i in range(self.args.comm_round):
+            logging.getLogger().setLevel(logging.ERROR)
+            self.client_sampling(i, self.args.client_num_in_total, self.args.client_num_per_round)
+            all += self.selected_clients
+            for client_id in self.selected_clients:
+                self.client_times[client_id] = self.get_client_completion_time(client_id)
+        if len(self.selected_clients) == 0 or len(self.failed_clients) > 0:
+            self.cur_time += self.round_timeout
+        else:
+            self.cur_time += np.max(self.client_times[self.selected_clients])
+        self.times.append(self.cur_time)
+        print(len(set(all)))
+        logging.error('{}: {}'.format(self.args.comm_round, self.cur_time))

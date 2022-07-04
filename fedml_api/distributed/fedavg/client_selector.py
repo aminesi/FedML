@@ -22,7 +22,7 @@ class FedCs(BaseSelector):
 
     def __init__(self, aggregator_args, model_size, train_num_dict) -> None:
         super().__init__(aggregator_args, model_size, train_num_dict)
-        self.round_limit = 60
+        self.round_limit = self.args.fedcs_time
 
     def sample(self, round_idx, candidates, client_num_per_round):
         np.random.seed(round_idx)  # make sure for each comparison, we are selecting the same clients each round
@@ -166,12 +166,13 @@ class TiFL(MdaSelector):
 
     def sample(self, round_idx, candidates, client_num_per_round):
         self.update_history(round_idx, candidates)
-        if round_idx % self.update_interval == 0 and round_idx >= self.update_interval:
-            self.calc_tiers_accuracy()
-            if self.old_tiers_acc and self.tiers_acc[self.selected_tier] <= self.old_tiers_acc[self.selected_tier]:
-                self.update_probabilities()
-            self.old_tiers_acc = deepcopy(self.tiers_acc)
+        # if round_idx % self.update_interval == 0 and round_idx >= self.update_interval:
+        #     self.calc_tiers_accuracy()
+        #     if self.old_tiers_acc and self.tiers_acc[self.selected_tier] <= self.old_tiers_acc[self.selected_tier]:
+        #         self.update_probabilities()
+        #     self.old_tiers_acc = deepcopy(self.tiers_acc)
 
+        np.random.seed(round_idx)
         logging.debug('START: select tier')
         self.selected_tier = np.random.choice(range(len(self.tiers)), 1, replace=False)[0]
         logging.info('TiFL selected tier for round {} = {}'.format(round_idx, self.selected_tier))

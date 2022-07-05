@@ -1,12 +1,16 @@
 #!/bin/bash
 
-#SBATCH --time=10:00:00
+#SBATCH --time=20:00:00
 #SBATCH --output=%x-%j.out
-#SBATCH --ntasks=11
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --gpus-per-task=p100:1
 #SBATCH --mem-per-cpu=4G
+#SBATCH --gpus-per-task=1
 #SBATCH --gpu-bind=single:1
+#SBATCH hetjob
+#SBATCH --ntasks=10
+#SBATCH --cpus-per-task=4
+#SBATCH --mem-per-cpu=4G
 
 cd ~/FedML
 
@@ -14,4 +18,6 @@ cd ~/FedML
 source venv/bin/activate
 
 cd ./fedml_experiments/distributed/fedavg/
-./cc/cc_run_with_conf femnist
+./cc/cc_run_with_conf_het cifar
+
+

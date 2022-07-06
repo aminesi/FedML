@@ -21,22 +21,22 @@ def FedML_init():
 
 
 def FedML_FedAvg_distributed(
-    process_id,
-    worker_number,
-    device,
-    comm,
-    model,
-    train_data_num,
-    train_data_global,
-    test_data_global,
-    train_data_local_num_dict,
-    train_data_local_dict,
-    test_data_local_dict,
-    args,
-    model_trainer=None,
-    preprocessed_sampling_lists=None,
+        process_id,
+        worker_number,
+        device,
+        comm,
+        model,
+        train_data_num,
+        train_data_global,
+        test_data_global,
+        train_data_local_num_dict,
+        train_data_local_dict,
+        test_data_local_dict,
+        args,
+        model_trainer=None,
+        preprocessed_sampling_lists=None,
 ):
-    if process_id == 0:
+    if process_id == worker_number - 1:
         init_server(
             args,
             device,
@@ -70,20 +70,20 @@ def FedML_FedAvg_distributed(
 
 
 def init_server(
-    args,
-    device,
-    comm,
-    rank,
-    size,
-    model,
-    train_data_num,
-    train_data_global,
-    test_data_global,
-    train_data_local_dict,
-    test_data_local_dict,
-    train_data_local_num_dict,
-    model_trainer,
-    preprocessed_sampling_lists=None,
+        args,
+        device,
+        comm,
+        rank,
+        size,
+        model,
+        train_data_num,
+        train_data_global,
+        test_data_global,
+        train_data_local_dict,
+        test_data_local_dict,
+        train_data_local_num_dict,
+        model_trainer,
+        preprocessed_sampling_lists=None,
 ):
     logging.info('Initializing server')
     if model_trainer is None:
@@ -130,21 +130,21 @@ def init_server(
 
 
 def init_client(
-    args,
-    device,
-    comm,
-    process_id,
-    size,
-    model,
-    train_data_num,
-    train_data_local_num_dict,
-    train_data_local_dict,
-    test_data_local_dict,
-    model_trainer=None,
+        args,
+        device,
+        comm,
+        process_id,
+        size,
+        model,
+        train_data_num,
+        train_data_local_num_dict,
+        train_data_local_dict,
+        test_data_local_dict,
+        model_trainer=None,
 ):
     logging.info('Initializing client')
 
-    client_index = process_id - 1
+    client_index = process_id
     if model_trainer is None:
         if args.dataset == "stackoverflow_lr":
             model_trainer = MyModelTrainerTAG(model)

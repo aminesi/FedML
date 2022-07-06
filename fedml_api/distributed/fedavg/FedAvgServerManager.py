@@ -37,8 +37,8 @@ class FedAVGServerManager(ServerManager):
         global_model_params = self.aggregator.get_global_model_params()
         if self.args.is_mobile == 1:
             global_model_params = transform_tensor_to_list(global_model_params)
-        for process_id in range(1, len(client_indexes) + 1):
-            self.send_message_init_config(process_id, global_model_params, client_indexes[process_id - 1])
+        for process_id in range(len(client_indexes)):
+            self.send_message_init_config(process_id, global_model_params, client_indexes[process_id])
 
     def sample_clients(self):
         # sampling clients
@@ -64,7 +64,7 @@ class FedAVGServerManager(ServerManager):
         model_params = msg_params.get(MyMessage.MSG_ARG_KEY_MODEL_PARAMS)
         local_sample_number = msg_params.get(MyMessage.MSG_ARG_KEY_NUM_SAMPLES)
 
-        self.aggregator.add_local_trained_result(sender_id - 1, model_params, local_sample_number)
+        self.aggregator.add_local_trained_result(sender_id, model_params, local_sample_number)
         b_all_received = self.aggregator.check_whether_all_receive()
         logging.info("b_all_received = " + str(b_all_received))
         if b_all_received:
@@ -91,9 +91,9 @@ class FedAVGServerManager(ServerManager):
             if self.args.is_mobile == 1:
                 global_model_params = transform_tensor_to_list(global_model_params)
 
-            for receiver_id in range(1, len(client_indexes) + 1):
+            for receiver_id in range(len(client_indexes)):
                 self.send_message_sync_model_to_client(receiver_id, global_model_params,
-                                                       client_indexes[receiver_id - 1])
+                                                       client_indexes[receiver_id])
 
     def send_message_init_config(self, receive_id, global_model_params, client_index):
         message = Message(MyMessage.MSG_TYPE_S2C_INIT_CONFIG, self.get_sender_id(), receive_id)
@@ -122,4 +122,3 @@ class FedAVGServerManager(ServerManager):
     def finish(self):
         self.aggregator.finish()
         super().finish()
-

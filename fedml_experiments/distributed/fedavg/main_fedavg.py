@@ -4,7 +4,7 @@ from mpi4py import MPI
 
 i = MPI.COMM_WORLD.Get_rank()
 
-prefix = 'Worker {}'.format(i) if i != 0 else 'Server'
+prefix = 'Worker {}'.format(i) if i != MPI.COMM_WORLD.Get_size() - 1 else 'Server'
 
 logging.basicConfig(
     level=logging.NOTSET,
@@ -472,7 +472,7 @@ if __name__ == "__main__":
     )
 
     # initialize the wandb machine learning experimental tracking platform (https://www.wandb.com/).
-    if process_id == 0:
+    if process_id == worker_number - 1:
         wandb.init(
             # project="federated_nas",
             project="fedml",
@@ -581,7 +581,7 @@ if __name__ == "__main__":
     for arg in vars(args):
         args_str.append('{} = {}'.format(arg, getattr(args, arg)))
     args_str = '\n'.join(args_str)
-    if process_id == 0:
+    if process_id == worker_number - 1:
         logging.info('Args:\n' + args_str)
 
     # start distributed training

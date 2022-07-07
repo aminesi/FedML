@@ -53,6 +53,7 @@ def add_args(parser):
     parser.add_argument('--fedcs_time', type=int, default=300)
     parser.add_argument('--score_method', type=str, default='mul')  # "add" or "mul"
     parser.add_argument('--mda_method', type=str, default='avail')  # "avail" or "mix"
+    parser.add_argument('--tifl_mode', type=str, default='prob')
     # Oort params
     parser.add_argument(
         "--partition_alpha", type=float, default=0.5, metavar="PA", help="partition alpha (default: 0.5)"

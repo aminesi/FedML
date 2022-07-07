@@ -133,8 +133,11 @@ class TiFL(MdaSelector):
         self.selected_tier = 0
         self.update_interval = int(self.args.comm_round * .02)
         self.tiers = [[] for _ in range(self.tier_count)]
+        self.probabilities = None
+        if self.args.tifl_mode == 'prob':
+            self.probabilities = np.array([1.4 ** i for i in range(self.tier_count - 1, -1, -1)])
+            self.probabilities = self.probabilities / self.probabilities.sum()
         self.credits = self.create_credits()
-        self.probabilities = [1 / self.tier_count] * self.tier_count
         self.old_tiers_acc = []
         self.tiers_acc = []
         self.assign_clients_to_tiers()
@@ -174,9 +177,10 @@ class TiFL(MdaSelector):
 
         np.random.seed(round_idx)
         logging.debug('START: select tier')
-        self.selected_tier = np.random.choice(range(len(self.tiers)), 1, replace=False)[0]
+        self.selected_tier = np.random.choice(range(len(self.tiers)), 1, replace=False, p=self.probabilities)[0]
         logging.info('TiFL selected tier for round {} = {}'.format(round_idx, self.selected_tier))
-        self.credits[self.selected_tier] -= 1
+        if self.args.tifl_mode == 'credit':
+            self.credits[self.selected_tier] -= 1
         logging.debug('END: select tier')
 
         logging.debug('START: select clients')
@@ -188,19 +192,20 @@ class TiFL(MdaSelector):
         client_indexes = np.random.choice(candidates, num_clients, replace=False, p=ws)
         logging.debug('END: select clients')
 
-        if self.credits[self.selected_tier] == 0:
+        if self.args.tifl_mode == 'credit' and self.credits[self.selected_tier] == 0:
             logging.info('TiFL tier {} of {} is out of credits.'.format(self.selected_tier, len(self.tiers)))
 
             logging.debug('START: removing tier')
             self.tiers.pop(self.selected_tier)
             self.credits.pop(self.selected_tier)
-            self.probabilities.pop(self.selected_tier)
+            if self.probabilities:
+                self.probabilities.pop(self.selected_tier)
             if self.old_tiers_acc:
                 self.old_tiers_acc.pop(self.selected_tier)
             if self.tiers_acc:
                 self.tiers_acc.pop(self.selected_tier)
             logging.debug('END: removing tier')
-            self.update_probabilities()
+            # self.update_probabilities()
             self.selected_tier = 0
         return client_indexes
 

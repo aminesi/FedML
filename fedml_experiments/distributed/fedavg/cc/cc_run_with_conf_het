@@ -16,9 +16,11 @@ keys=$(jq "keys[]" "$conf_file")
 
 args=""
 for key in $keys; do
-  if [ "${key//\"/}" = "selector" ]; then
-    if [[ -v SELECTOR ]]; then
-      args="$args --selector $SELECTOR"
+  k="${key//\"/}"
+  if [ $k = "selector" ] || [ $k = "resume_dir" ]; then
+    ku=${k^^}
+    if [[ -v $ku ]]; then
+      args="$args --$k ${!ku}"
       continue
     fi
   fi

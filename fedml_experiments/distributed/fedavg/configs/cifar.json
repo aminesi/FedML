@@ -12,7 +12,7 @@
   "client_optimizer": "sgd",
   "batch_size": 20,
   "lr": 0.01,
-  "checkpoints": "500 1000 2000 2500",
+  "checkpoints": "500 1000 1500 2000 2500",
   "allow_failed_clients": "no",
   "time_mode": "simulated",
   "trace_distro": "average",

@@ -77,6 +77,7 @@ def add_args(parser):
     parser.add_argument('--mda_method', type=str, default='avail')  # "avail" or "mix"
     parser.add_argument('--fedcs_time', type=int, default=65)
     parser.add_argument('--tifl_mode', type=str, default='prob')  # "prob" or "credit"
+    parser.add_argument('--resume_dir', type=str, default='')
     # Oort params
 
     parser.add_argument('--pacer_delta', type=float, default=5)

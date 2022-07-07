@@ -1,7 +1,9 @@
 import logging
 import os, signal
 import sys
+import re
 
+import pydevd_pycharm
 import torch
 
 from .message_define import MyMessage
@@ -33,12 +35,31 @@ class FedAVGServerManager(ServerManager):
 
     def send_init_msg(self):
         # sampling clients
+        self.handle_resume()
         client_indexes = self.sample_clients()
         global_model_params = self.aggregator.get_global_model_params()
         if self.args.is_mobile == 1:
             global_model_params = transform_tensor_to_list(global_model_params)
         for process_id in range(len(client_indexes)):
             self.send_message_init_config(process_id, global_model_params, client_indexes[process_id])
+
+    def handle_resume(self):
+        if self.args.resume_dir:
+            base = self.args.resume_dir
+            latest = (0, '')
+            for f in os.listdir(base):
+                results = re.compile('model-(\\d+)\\.pth').search(f)
+                if results:
+                    round = int(results.group(1))
+                    if round > latest[0]:
+                        latest = (round, f)
+            if latest[0] >= self.round_num or latest[0] == 0:
+                self.finish()
+            else:
+                self.round_idx = latest[0]
+                self.aggregator.set_global_model_params(torch.load(os.path.join(base, latest[1])))
+                self.args.output_dir = base
+                self.aggregator.handle_resume(self.round_idx)
 
     def sample_clients(self):
         # sampling clients

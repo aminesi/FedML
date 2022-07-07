@@ -1,3 +1,6 @@
+import ast
+import os
+import re
 from enum import Enum
 from typing import List
 
@@ -53,7 +56,9 @@ class BaseSelector:
     def client_sampling(self, round_idx, client_num_in_total, client_num_per_round):
         if self.cur_time == -1:
             self.cur_time = 0
-        else:
+            if round_idx != 0:
+                return self.handle_resume(round_idx)
+        elif round_idx != 0:
             if len(self.selected_clients) == 0 or len(self.failed_clients) > 0:
                 self.cur_time += self.round_timeout
             else:
@@ -106,3 +111,11 @@ class BaseSelector:
         logging.error('participants num: {}'.format(len(set(all))))
         logging.error('failed rounds: {}'.format(failed))
         logging.error('{}: {}'.format(self.args.comm_round, self.cur_time))
+
+    def handle_resume(self, round_index):
+        for i in range(round_index):
+            self.client_sampling(i, self.args.client_num_in_total, self.args.client_num_per_round)
+            for client_id in self.selected_clients:
+                self.client_times[client_id] = self.get_client_completion_time(client_id)
+
+        return self.client_sampling(round_index, self.args.client_num_in_total, self.args.client_num_per_round)

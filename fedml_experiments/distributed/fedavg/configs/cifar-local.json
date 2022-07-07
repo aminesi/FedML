@@ -6,8 +6,8 @@
   "partition_method": "hetero",
   "partition_alpha": 0.2,
   "client_num_per_round": 1,
-  "client_num_in_total": 3,
-  "comm_round": 1000,
+  "client_num_in_total": 500,
+  "comm_round": 2500,
   "epochs": 1,
   "client_optimizer": "sgd",
   "batch_size": 20,
@@ -18,5 +18,6 @@
   "trace_distro": "average",
   "selector": "random",
   "mda_method": "avail",
-  "score_method": "add"
+  "score_method": "add",
+  "resume_dir": "/home/amin/PycharmProjects/FedML/fedml_experiments/distributed/fedavg/results/2022-07-04T02:03:32.178-0400-resumetest/"
 }

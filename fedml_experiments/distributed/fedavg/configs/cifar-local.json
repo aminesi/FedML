@@ -6,7 +6,7 @@
   "partition_method": "hetero",
   "partition_alpha": 0.2,
   "client_num_per_round": 1,
-  "client_num_in_total": 500,
+  "client_num_in_total": 2,
   "comm_round": 2500,
   "epochs": 1,
   "client_optimizer": "sgd",
@@ -19,7 +19,7 @@
   "selector": "mda",
   "mda_method": "avail",
   "score_method": "mul",
-  "resume_dir": "/home/amin/PycharmProjects/FedML/fedml_experiments/distributed/fedavg/results/2022-07-06T19:35:41.450-0700/",
+  "resume_dir": "none",
   "round_timeout": 860,
   "fedcs_time": 300
 }

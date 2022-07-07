@@ -44,7 +44,7 @@ class FedAVGServerManager(ServerManager):
             self.send_message_init_config(process_id, global_model_params, client_indexes[process_id])
 
     def handle_resume(self):
-        if self.args.resume_dir:
+        if self.args.resume_dir and self.args.resume_dir != 'none':
             base = self.args.resume_dir
             latest = (0, '')
             for f in os.listdir(base):

@@ -1,7 +1,9 @@
 import copy
 import logging
+import os
 import pickle
 import random
+import re
 import sys
 import time
 
@@ -177,6 +179,16 @@ class FedAVGAggregator(BaseAggregator):
             wandb.log({"Test/Loss": test_loss, "round": round_idx})
             stats = {'test_acc': test_acc, 'test_loss': test_loss}
             logging.info(stats)
+
+    def handle_resume(self, round_index):
+        base = self.args.resume_dir
+        raw = ''
+        for f in os.listdir(base):
+            if f.endswith('.out'):
+                with open(os.path.join(base, f)) as file:
+                    raw = file.read()
+                break
+        self.accuracies = list(map(lambda x: float(x[0]), re.findall('\'test_acc\': ((\\d|\\.)+)', raw)))[:round_index]
 
     def finish(self):
         np.save(self.args.output_dir + 'accuracies.npy', np.array(self.accuracies))

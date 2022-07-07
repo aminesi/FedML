@@ -44,7 +44,6 @@ class FedAVGServerManager(ServerManager):
             self.send_message_init_config(process_id, global_model_params, client_indexes[process_id])
 
     def handle_resume(self):
-        pydevd_pycharm.settrace('localhost', port=38163, stdoutToServer=True, stderrToServer=True, suspend=False)
         if self.args.resume_dir:
             base = self.args.resume_dir
             latest = (0, '')
@@ -60,10 +59,7 @@ class FedAVGServerManager(ServerManager):
                 self.round_idx = latest[0]
                 self.aggregator.set_global_model_params(torch.load(os.path.join(base, latest[1])))
                 self.args.output_dir = base
-
-                # todo remove this
-                self.args.client_num_per_round = 10
-                self.args.client_num_in_total = 500
+                self.aggregator.handle_resume(self.round_idx)
 
     def sample_clients(self):
         # sampling clients

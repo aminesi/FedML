@@ -13,11 +13,13 @@
   "batch_size": 20,
   "lr": 0.01,
   "checkpoints": "500 1000",
-  "allow_failed_clients": "yes",
-  "time_mode": "none",
+  "allow_failed_clients": "no",
+  "time_mode": "simulated",
   "trace_distro": "average",
-  "selector": "random",
+  "selector": "mda",
   "mda_method": "avail",
-  "score_method": "add",
-  "resume_dir": "/home/amin/PycharmProjects/FedML/fedml_experiments/distributed/fedavg/results/2022-07-04T02:03:32.178-0400-resumetest/"
+  "score_method": "mul",
+  "resume_dir": "/home/amin/PycharmProjects/FedML/fedml_experiments/distributed/fedavg/results/2022-07-06T19:35:41.450-0700/",
+  "round_timeout": 860,
+  "fedcs_time": 300
 }

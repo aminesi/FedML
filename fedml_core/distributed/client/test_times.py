@@ -146,38 +146,38 @@ for s in ['random', 'mda', 'fedcs', 'tifl', 'tiflx']:
 
 
 # random
-# 11:50:03  ERROR  (base_selector.py:106)  Server -  participants num: 492
-# 11:50:03  ERROR  (base_selector.py:107)  Server -  failed rounds: 1039
-# 11:50:03  ERROR  (base_selector.py:108)  Server -  2500: 1709592.0781860352
-# 11:50:03  ERROR  (test_times.py:131)  Server -
+# 01:44:00  ERROR  (base_selector.py:111)  Server -  participants num: 492
+# 01:44:00  ERROR  (base_selector.py:112)  Server -  failed rounds: 1039
+# 01:44:00  ERROR  (base_selector.py:113)  Server -  2500: 1709592.0781860352
+# 01:44:00  ERROR  (test_times.py:132)  Server -
 #
 # mda
-# 11:50:26  ERROR  (base_selector.py:106)  Server -  participants num: 481
-# 11:50:26  ERROR  (base_selector.py:107)  Server -  failed rounds: 676
-# 11:50:26  ERROR  (base_selector.py:108)  Server -  2500: 1616575.1212921143
-# 11:50:26  ERROR  (test_times.py:131)  Server -
+# 01:44:21  ERROR  (base_selector.py:111)  Server -  participants num: 481
+# 01:44:21  ERROR  (base_selector.py:112)  Server -  failed rounds: 676
+# 01:44:21  ERROR  (base_selector.py:113)  Server -  2500: 1616575.1212921143
+# 01:44:21  ERROR  (test_times.py:132)  Server -
 #
 # fedcs
-# 11:50:28  ERROR  (base_selector.py:106)  Server -  participants num: 362
-# 11:50:28  ERROR  (base_selector.py:107)  Server -  failed rounds: 562
-# 11:50:28  ERROR  (base_selector.py:108)  Server -  2500: 928120.4834098816
-# 11:50:28  ERROR  (test_times.py:131)  Server -
+# 01:44:24  ERROR  (base_selector.py:111)  Server -  participants num: 362
+# 01:44:24  ERROR  (base_selector.py:112)  Server -  failed rounds: 562
+# 01:44:24  ERROR  (base_selector.py:113)  Server -  2500: 928120.4834098816
+# 01:44:24  ERROR  (test_times.py:132)  Server -
 #
 # tifl
-# 11:50:29  DEBUG  (client_selector.py:145)  Server -  START: create credits
-# 11:50:29  DEBUG  (client_selector.py:151)  Server -  END: create credits
-# 11:50:29  DEBUG  (client_selector.py:155)  Server -  START: assign clients
-# 11:50:29  DEBUG  (client_selector.py:158)  Server -  END: assign clients
-# 11:50:32  ERROR  (base_selector.py:106)  Server -  participants num: 487
-# 11:50:32  ERROR  (base_selector.py:107)  Server -  failed rounds: 707
-# 11:50:32  ERROR  (base_selector.py:108)  Server -  2500: 855735.0201873779
-# 11:50:32  ERROR  (test_times.py:131)  Server -
+# 01:44:25  DEBUG  (client_selector.py:148)  Server -  START: create credits
+# 01:44:25  DEBUG  (client_selector.py:154)  Server -  END: create credits
+# 01:44:25  DEBUG  (client_selector.py:158)  Server -  START: assign clients
+# 01:44:25  DEBUG  (client_selector.py:161)  Server -  END: assign clients
+# 01:44:27  ERROR  (base_selector.py:111)  Server -  participants num: 493
+# 01:44:27  ERROR  (base_selector.py:112)  Server -  failed rounds: 711
+# 01:44:27  ERROR  (base_selector.py:113)  Server -  2500: 877288.4594078064
+# 01:44:27  ERROR  (test_times.py:132)  Server -
 #
 # tiflx
-# 11:50:33  DEBUG  (client_selector.py:145)  Server -  START: create credits
-# 11:50:33  DEBUG  (client_selector.py:151)  Server -  END: create credits
-# 11:50:33  DEBUG  (client_selector.py:155)  Server -  START: assign clients
-# 11:50:33  DEBUG  (client_selector.py:158)  Server -  END: assign clients
-# 11:50:39  ERROR  (base_selector.py:106)  Server -  participants num: 481
-# 11:50:39  ERROR  (base_selector.py:107)  Server -  failed rounds: 523
-# 11:50:39  ERROR  (base_selector.py:108)  Server -  2500: 748523.7948684692
+# 01:44:28  DEBUG  (client_selector.py:148)  Server -  START: create credits
+# 01:44:28  DEBUG  (client_selector.py:154)  Server -  END: create credits
+# 01:44:28  DEBUG  (client_selector.py:158)  Server -  START: assign clients
+# 01:44:28  DEBUG  (client_selector.py:161)  Server -  END: assign clients
+# 01:44:35  ERROR  (base_selector.py:111)  Server -  participants num: 483
+# 01:44:35  ERROR  (base_selector.py:112)  Server -  failed rounds: 529
+# 01:44:35  ERROR  (base_selector.py:113)  Server -  2500: 768188.370803833

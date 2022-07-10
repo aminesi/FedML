@@ -16,7 +16,7 @@
   "allow_failed_clients": "no",
   "time_mode": "simulated",
   "trace_distro": "average",
-  "selector": "mda",
+  "selector": "random",
   "mda_method": "avail",
   "score_method": "mul",
   "resume_dir": "none",

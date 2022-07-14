@@ -17,7 +17,7 @@ keys=$(jq "keys[]" "$conf_file")
 args=""
 for key in $keys; do
   k="${key//\"/}"
-  if [ $k = "selector" ] || [ $k = "resume_dir" ]; then
+  if [ $k = "selector" ] || [ $k = "resume_dir" ] || [ $k = "allow_failed_clients" ] || [ $k = "trace_distro" ] || [ $k = "score_method" ]; then
     ku=${k^^}
     if [[ -v $ku ]]; then
       args="$args --$k ${!ku}"

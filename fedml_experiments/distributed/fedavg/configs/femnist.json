@@ -16,5 +16,6 @@
   "trace_distro": "average",
   "selector": "mda",
   "mda_method": "avail",
-  "score_method": "add"
+  "score_method": "add",
+  "resume_dir": "none"
 }

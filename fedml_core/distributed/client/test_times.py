@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 
 
-def add_args(parser):
+def add_args(parser, dataset):
     """
     parser : argparse.ArgumentParser
     return a parser added with args required by fit
@@ -49,8 +49,14 @@ def add_args(parser):
     parser.add_argument('--allow_failed_clients', type=str, default='no')  # 'yes' or 'no'
     parser.add_argument('--trace_distro', type=str,
                         default='average')  # "random" or "high_avail" or "low_avail" or "average"
-    parser.add_argument('--round_timeout', type=int, default=860)
-    parser.add_argument('--fedcs_time', type=int, default=300)
+    if dataset == 'femnist':
+        parser.add_argument('--round_timeout', type=int, default=180)
+    if dataset == 'cifar':
+        parser.add_argument('--round_timeout', type=int, default=860)
+    if dataset == 'femnist':
+        parser.add_argument('--fedcs_time', type=int, default=65)
+    if dataset == 'cifar':
+        parser.add_argument('--fedcs_time', type=int, default=300)
     parser.add_argument('--score_method', type=str, default='mul')  # "add" or "mul"
     parser.add_argument('--mda_method', type=str, default='avail')  # "avail" or "mix"
     parser.add_argument('--tifl_mode', type=str, default='prob')
@@ -59,10 +65,16 @@ def add_args(parser):
         "--partition_alpha", type=float, default=0.5, metavar="PA", help="partition alpha (default: 0.5)"
     )
 
-    parser.add_argument(
-        "--client_num_in_total", type=int, default=500, metavar="NN",
-        help="number of workers in a distributed cluster"
-    )
+    if dataset == 'femnist':
+        parser.add_argument(
+            "--client_num_in_total", type=int, default=3400, metavar="NN",
+            help="number of workers in a distributed cluster"
+        )
+    if dataset == 'cifar':
+        parser.add_argument(
+            "--client_num_in_total", type=int, default=500, metavar="NN",
+            help="number of workers in a distributed cluster"
+        )
 
     parser.add_argument("--client_num_per_round", type=int, default=10, metavar="NN", help="number of workers")
 
@@ -80,7 +92,12 @@ def add_args(parser):
 
     parser.add_argument("--epochs", type=int, default=1, metavar="EP", help="how many epochs will be trained locally")
 
-    parser.add_argument("--comm_round", type=int, default=2500, help="how many round of communications we shoud use")
+    if dataset == 'femnist':
+        parser.add_argument("--comm_round", type=int, default=2000,
+                            help="how many round of communications we shoud use")
+    if dataset == 'cifar':
+        parser.add_argument("--comm_round", type=int, default=2500,
+                            help="how many round of communications we shoud use")
 
     parser.add_argument(
         "--is_mobile", type=int, default=1, help="whether the program is running on the FedML-Mobile server side"
@@ -123,27 +140,32 @@ def add_args(parser):
     return args
 
 
+dataset = 'cifar'
+
 parser = argparse.ArgumentParser()
-args = add_args(parser)
+args = add_args(parser, dataset)
 logging.getLogger().setLevel(logging.ERROR)
+
+model_size = 85140.453125
+if dataset == 'cifar':
+    model_size = 427386.5234375
 
 for s in ['random', 'mda', 'fedcs', 'tifl', 'tiflx']:
     args.selector = s
     logging.error('\n\n{}'.format(s))
 
     if s == 'random':
-        client_selector = RandomSelector(args, 427386.5234375, 0)
+        client_selector = RandomSelector(args, model_size, 0)
     elif s == 'mda':
-        client_selector = MdaSelector(args, 427386.5234375, 0)
+        client_selector = MdaSelector(args, model_size, 0)
     elif s == 'fedcs':
-        client_selector = FedCs(args, 427386.5234375, 0)
+        client_selector = FedCs(args, model_size, 0)
     elif s == 'tifl' or s == 'tiflx':
-        client_selector = TiFL(args, 427386.5234375, 0, None)
+        client_selector = TiFL(args, model_size, 0, None)
     else:
         raise AttributeError('Unknown clients selector. selector can be "random" or "fedcs" or "oort"')
 
     client_selector.simulate()
-
 
 # random
 # 01:44:00  ERROR  (base_selector.py:111)  Server -  participants num: 492

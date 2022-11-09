@@ -1,0 +1,14 @@
+\begin{tabular}{lll}
+\toprule
+ & \multicolumn{2}{c}{Selector}\\
+ &       Random &          MDA \\
+\midrule
+Finish time(s)         & 1,709,592    & 1,616,575    \\
+Failed rounds          &     1,039    &       676    \\
+Accuracy mean          &        75.55 &        74.85 \\
+Accuracy std           &         2.70 &         1.34 \\
+Average failed clients &         0.52 &         0.31 \\
+Unique participants    &       492    &       481    \\
+Total participants     &    23,694    &    24,220    \\
+\bottomrule
+\end{tabular}

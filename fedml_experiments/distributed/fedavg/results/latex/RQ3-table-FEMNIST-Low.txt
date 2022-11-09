@@ -1,0 +1,14 @@
+\begin{tabular}{llll}
+\toprule
+ & \multicolumn{3}{c}{Selector}\\
+ &     Random &      FedCS &       TiFL \\
+\midrule
+Finish time(s)         & 253,606    & 116,294    & 102,386    \\
+Failed rounds          &     250    &     129    &     189    \\
+Accuracy mean          &      79.11 &      78.97 &      79.38 \\
+Accuracy std           &       0.83 &       1.16 &       1.03 \\
+Average failed clients &       0.14 &       0.07 &       0.11 \\
+Unique participants    &   1,900    &   1,389    &   1,797    \\
+Total participants     &  19,730    &  14,602    &  19,789    \\
+\bottomrule
+\end{tabular}

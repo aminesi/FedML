@@ -2,7 +2,15 @@
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
-conf_file="$SCRIPT_DIR/configs/$1"
+cd "$SCRIPT_DIR"
+cd ../
+
+conf_name=$1
+
+if [[ $conf_name != *.json ]]; then
+  conf_name="$conf_name.json"
+fi
+conf_file="$(pwd)/configs/$conf_name"
 
 keys=$(jq "keys[]" "$conf_file")
 
@@ -31,7 +39,7 @@ hostname >mpi_host_file
 wandb login de2baeecb9db7ce75202bef9bc58e3aa6125452b
 wandb off
 
-OUTPUT_DIR="./results-local/$(date '+%Y-%m-%dT%H:%M:%S.%3N%z')/"
+OUTPUT_DIR="./results/$(date '+%Y-%m-%dT%H:%M:%S.%3N%z')/"
 args="$args --output_dir $OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 cp "$conf_file" "$OUTPUT_DIR"

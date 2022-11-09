@@ -1,0 +1,14 @@
+\begin{tabular}{llll}
+\toprule
+ & \multicolumn{3}{c}{Selector}\\
+ &  MDA-failure history &  MDA-availability history &        MDA \\
+\midrule
+Finish time(s)         &           254,351    &                251,615    & 248,605    \\
+Failed rounds          &               234    &                    202    &     203    \\
+Accuracy mean          &                84.44 &                     84.47 &      84.37 \\
+Accuracy std           &                 0.74 &                      0.66 &       0.69 \\
+Average failed clients &                 0.12 &                      0.11 &       0.11 \\
+Unique participants    &             2,800    &                  2,753    &   2,767    \\
+Total participants     &            19,750    &                 19,789    &  19,788    \\
+\bottomrule
+\end{tabular}

@@ -54,7 +54,7 @@ class CNN_OriginalFedAvg(torch.nn.Module):
         self.linear_1 = nn.Linear(3136, 512)
         self.linear_2 = nn.Linear(512, 10 if only_digits else 62)
         self.relu = nn.ReLU()
-        #self.softmax = nn.Softmax(dim=1)
+        # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = torch.unsqueeze(x, 1)
@@ -67,7 +67,7 @@ class CNN_OriginalFedAvg(torch.nn.Module):
         x = self.flatten(x)
         x = self.relu(self.linear_1(x))
         x = self.linear_2(x)
-        #x = self.softmax(self.linear_2(x))
+        # x = self.softmax(self.linear_2(x))
         return x
 
 
@@ -123,7 +123,7 @@ class CNN_DropOut(torch.nn.Module):
         self.dropout_2 = nn.Dropout(0.5)
         self.linear_2 = nn.Linear(128, 10 if only_digits else 62)
         self.relu = nn.ReLU()
-        #self.softmax = nn.Softmax(dim=1)
+        # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = torch.unsqueeze(x, 1)
@@ -138,5 +138,30 @@ class CNN_DropOut(torch.nn.Module):
         x = self.relu(x)
         x = self.dropout_2(x)
         x = self.linear_2(x)
-        #x = self.softmax(self.linear_2(x))
+        # x = self.softmax(self.linear_2(x))
         return x
+
+# ----------------------------------------------------------------
+#         Layer (type)               Output Shape         Param #
+# ================================================================
+#             Conv2d-1           [-1, 32, 26, 26]             320
+#               ReLU-2           [-1, 32, 26, 26]               0
+#             Conv2d-3           [-1, 64, 24, 24]          18,496
+#               ReLU-4           [-1, 64, 24, 24]               0
+#          MaxPool2d-5           [-1, 64, 12, 12]               0
+#            Dropout-6           [-1, 64, 12, 12]               0
+#            Flatten-7                 [-1, 9216]               0
+#             Linear-8                  [-1, 128]       1,179,776
+#               ReLU-9                  [-1, 128]               0
+#           Dropout-10                  [-1, 128]               0
+#            Linear-11                   [-1, 10]           1,290
+# ================================================================
+# Total params: 1,199,882
+# Trainable params: 1,199,882
+# Non-trainable params: 0
+# ----------------------------------------------------------------
+# Input size (MB): 0.00
+# Forward/backward pass size (MB): 1.11
+# Params size (MB): 4.58
+# Estimated Total Size (MB): 5.69
+# ----------------------------------------------------------------

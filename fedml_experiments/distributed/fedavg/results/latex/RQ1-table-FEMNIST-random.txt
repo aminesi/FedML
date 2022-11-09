@@ -1,0 +1,14 @@
+\begin{tabular}{llll}
+\toprule
+ & \multicolumn{3}{c}{Availability}\\
+ &       High &    Average &        Low \\
+\midrule
+Finish time(s)         & 236,739    & 250,424    & 253,606    \\
+Failed rounds          &     148    &     222    &     250    \\
+Accuracy mean          &      84.11 &      84.55 &      79.11 \\
+Accuracy std           &       1.84 &       0.61 &       0.83 \\
+Average failed clients &       0.08 &       0.12 &       0.14 \\
+Unique participants    &   2,780    &   2,788    &   1,900    \\
+Total participants     &  19,846    &  19,765    &  19,730    \\
+\bottomrule
+\end{tabular}
